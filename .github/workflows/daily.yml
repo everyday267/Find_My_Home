@@ -1,0 +1,65 @@
+name: daily-tracking
+
+on:
+  schedule:
+    - cron: "0 22 * * *"   # 매일 07:00 KST
+  workflow_dispatch:
+    inputs:
+      command:
+        description: "실행할 명령 (run / backfill)"
+        default: run
+        required: true
+
+permissions:
+  contents: write
+
+concurrency:
+  group: daily-tracking
+  cancel-in-progress: false
+
+jobs:
+  track:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Check config
+        run: |
+          if [ ! -f config.yaml ]; then
+            echo "::error::config.yaml이 없습니다. config.example.yaml을 복사해 단지 정보를 입력하고 커밋하세요."
+            exit 1
+          fi
+
+      - name: Collect & compare
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: |
+          if [ "${{ github.event.inputs.command }}" = "backfill" ]; then
+            python -m tracker backfill --months 24
+          else
+            python -m tracker run
+          fi
+
+      - name: Commit data
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data reports
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+          else
+            git commit -m "data: $(TZ=Asia/Seoul date +%F) 실거래/호가 업데이트"
+            git push
+          fi
+
+      - name: Job summary
+        if: always()
+        run: |
+          if [ -f reports/latest.md ]; then cat reports/latest.md >> "$GITHUB_STEP_SUMMARY"; fi

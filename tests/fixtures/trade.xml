@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<response><header><resultCode>000</resultCode><resultMsg>OK</resultMsg></header><body><items>
+<item><aptDong>101</aptDong><aptNm>우리아파트</aptNm><aptSeq>11710-100</aptSeq><buildYear>2010</buildYear><cdealDay> </cdealDay><cdealType> </cdealType><dealAmount>150,000</dealAmount><dealDay>5</dealDay><dealMonth>9</dealMonth><dealYear>2026</dealYear><dealingGbn>중개거래</dealingGbn><excluUseAr>84.97</excluUseAr><floor>10</floor><jibun>12</jibun><umdNm>잠실동</umdNm></item>
+<item><aptDong></aptDong><aptNm>우리아파트</aptNm><aptSeq>11710-100</aptSeq><cdealDay>26.09.20</cdealDay><cdealType>O</cdealType><dealAmount>170,000</dealAmount><dealDay>8</dealDay><dealMonth>9</dealMonth><dealYear>2026</dealYear><excluUseAr>84.97</excluUseAr><floor>3</floor><umdNm>잠실동</umdNm></item>
+<item><aptNm>우리아파트</aptNm><aptSeq>11710-100</aptSeq><dealAmount>100,000</dealAmount><dealDay>9</dealDay><dealMonth>9</dealMonth><dealYear>2026</dealYear><excluUseAr>59.9</excluUseAr><floor>5</floor><umdNm>잠실동</umdNm></item>
+<item><aptNm>후보 A</aptNm><aptSeq>11710-200</aptSeq><dealAmount>230,000</dealAmount><dealDay>12</dealDay><dealMonth>9</dealMonth><dealYear>2026</dealYear><excluUseAr>84.5</excluUseAr><floor>15</floor><umdNm>신천동</umdNm></item>
+<item><aptNm>다른단지</aptNm><aptSeq>11710-300</aptSeq><dealAmount>90,000</dealAmount><dealDay>1</dealDay><dealMonth>9</dealMonth><dealYear>2026</dealYear><excluUseAr>84.5</excluUseAr><floor>2</floor><umdNm>신천동</umdNm></item>
+</items><numOfRows>1000</numOfRows><pageNo>1</pageNo><totalCount>5</totalCount></body></response>

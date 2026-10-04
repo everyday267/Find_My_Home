@@ -1,0 +1,8 @@
+{"result": {"moreDataYn": "N", "totAtclCnt": 4, "list": [
+ {"atclNo": "1", "tradTpCd": "A1", "prc": 160000, "hanPrc": "16억", "spc1": "112", "spc2": "84.97", "flrInfo": "10/25", "bildNm": "101동", "direction": "남향", "atclCfmYmd": "26.10.01."},
+ {"atclNo": "2", "tradTpCd": "A1", "prc": 160000, "hanPrc": "16억", "spc1": "112", "spc2": "84.97", "flrInfo": "10/25", "bildNm": "101동"},
+ {"atclNo": "3", "tradTpCd": "A1", "hanPrc": "17억 5,000", "spc1": "112", "spc2": "84.97", "flrInfo": "고/25", "bildNm": "102동"},
+ {"atclNo": "4", "tradTpCd": "B1", "prc": 85000, "spc1": "112", "spc2": "84.97", "flrInfo": "5/25", "bildNm": "103동"},
+ {"atclNo": "5", "tradTpCd": "B2", "prc": 30000, "rentPrc": 150, "spc1": "112", "spc2": "84.97", "flrInfo": "3/25", "bildNm": "103동"},
+ {"atclNo": "6", "tradTpCd": "A1", "prc": 110000, "spc1": "80", "spc2": "59.9", "flrInfo": "3/25", "bildNm": "105동"}
+]}}

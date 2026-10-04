@@ -1,0 +1,50 @@
+# 갈아타기 트래커 설정 — 이 파일을 config.yaml로 복사해 수정하세요.
+#
+# 항목 설명
+#   id               : 영문/숫자 식별자 (DB 키, 바꾸면 이력이 분리됨)
+#   name             : 리포트 표시명
+#   lawd_cd          : 법정동코드 앞 5자리(시군구). 예) 강남구 11680, 송파구 11710, 분당구 41135
+#                      https://www.code.go.kr 에서 조회
+#   apt_name         : 국토부 실거래 데이터의 단지명(aptNm). 네이버 표기와 다를 수 있으니
+#                      `python -m tracker find-apt <lawd_cd> --name 키워드` 로 확인. 여러 개면 리스트.
+#   apt_seq          : (선택) 국토부 단지 일련번호. 지정하면 이름 대신 이것으로 매칭(가장 정확)
+#   umd_nm           : (선택) 법정동명. 같은 이름의 단지가 시군구에 여럿일 때 구분
+#   naver_complex_no : (선택) 네이버 부동산 단지번호 — 호가 수집용.
+#                      new.land.naver.com/complexes/<번호> URL의 숫자
+#   area_min/max     : 비교할 전용면적(㎡) 범위. 같은 평형끼리 비교해야 갭이 의미가 있음
+#                      예) 84타입 → 84~85.99, 59타입 → 59~60.99
+
+home:
+  id: home
+  name: 우리집 OO아파트 84
+  lawd_cd: "11710"
+  apt_name: "OO아파트"
+  naver_complex_no: "00000"
+  area_min: 84
+  area_max: 85.99
+
+targets:
+  - id: target_a
+    name: 갈아탈 후보 A 84
+    lawd_cd: "11680"
+    apt_name: ["후보A", "후보A아파트"]
+    naver_complex_no: "11111"
+    area_min: 84
+    area_max: 85.99
+
+  - id: target_b
+    name: 갈아탈 후보 B 84
+    lawd_cd: "11650"
+    apt_name: "후보B"
+    umd_nm: "반포동"
+    naver_complex_no: "22222"
+    area_min: 84
+    area_max: 85.99
+
+settings:
+  trade_lookback_months: 3   # 실거래 중위가 계산 기간(개월)
+  fetch_months: 3            # 매일 재조회할 최근 계약월 수 (신고기한 30일·해제신고 반영)
+  naver_delay_sec: 1.5       # 네이버 요청 간격(초)
+  naver_max_pages: 30
+  db_path: data/tracker.db
+  report_dir: reports
