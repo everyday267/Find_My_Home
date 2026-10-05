@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from tracker import scenario
-from tracker.analysis import GAP_METRICS, METRIC_LABELS, gap_series, gap_signal
+from tracker.analysis import METRIC_LABELS, gap_series, gap_signal
 from tracker.config import Config
 
 
@@ -294,26 +294,13 @@ def build_dashboard_data(conn: sqlite3.Connection, cfg: Config, ds: str) -> dict
     trades = {}
     for cx in cfg.complexes:
         rows = conn.execute(
-            "SELECT deal_date, price, floor FROM trades WHERE complex_id=? AND cancelled=0 AND deal_date>=? "
+            "SELECT deal_date, price, floor, area FROM trades WHERE complex_id=? AND cancelled=0 AND deal_date>=? "
             "AND deal_date<=? AND area BETWEEN ? AND ? ORDER BY deal_date",
             (cx.id, since, ds, cx.area_min or 0, cx.area_max or 1e9),
         ).fetchall()
-        trades[cx.id] = [[_epoch_ms(r["deal_date"]), r["price"], r["floor"]] for r in rows]
+        trades[cx.id] = [[_epoch_ms(r["deal_date"]), r["price"], r["floor"], r["area"]] for r in rows]
 
-    metrics = {}
-    for m in GAP_METRICS:
-        metrics[f"gap:{m}"] = {"label": f"우리집 대비 차이 — {METRIC_LABELS[m]}", "series": {}}
-    for r in conn.execute("SELECT date, target_id, metric, gap FROM gaps WHERE gap IS NOT NULL AND date>=?", (since,)):
-        key = f"gap:{r['metric']}"
-        if key in metrics:
-            metrics[key]["series"].setdefault(r["target_id"], {})[r["date"]] = r["gap"]
-    for r in conn.execute("SELECT date, target_id, scenario, basis, surplus FROM scenarios WHERE date>=?", (since,)):
-        key = f"scenario:{r['scenario']}:{r['basis']}"
-        metrics.setdefault(key, {"label": f"{scenario.SCENARIOS[r['scenario']]} 여유/부족 "
-                                          f"({scenario.BASES[r['basis']]})", "series": {}})
-        metrics[key]["series"].setdefault(r["target_id"], {})[r["date"]] = r["surplus"]
-    metrics = {k: v for k, v in metrics.items() if v["series"]}
-    return {"updated": ds, "complexes": complexes, "trades": trades, "metrics": metrics}
+    return {"updated": ds, "complexes": complexes, "trades": trades}
 
 
 def build_dashboard(conn: sqlite3.Connection, cfg: Config, ds: str) -> str:

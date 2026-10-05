@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>갈아타기 트래커</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
 <style>
 :root {
   color-scheme: light;
@@ -75,7 +77,25 @@ select { font: inherit; background: var(--surface); color: var(--ink); border: 1
 .panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
 @media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 12px 8px; }
-.card h3 { font-size: 15px; margin: 0 0 2px; }
+.card h3 { font-size: 15px; margin: 0 0 2px; display: flex; align-items: center; gap: 8px; }
+.card.zoomable { cursor: zoom-in; }
+.card.zoomable:hover { border-color: var(--axis); }
+.expand { margin-left: auto; font-size: 12px; font-weight: 400; color: var(--ink-2); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 8px; cursor: pointer; }
+.modal { position: fixed; inset: 0; z-index: 20; background: var(--page); display: flex; flex-direction: column; padding: 12px 16px 16px; }
+.modal[hidden] { display: none !important; }
+.mhead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; margin-bottom: 6px; }
+.mhead h3 { font-size: 17px; margin: 0; }
+.mhead .hint { color: var(--muted); font-size: 12px; }
+.mtools { margin-left: auto; display: flex; gap: 6px; }
+.mtools button { font: inherit; background: var(--surface); color: var(--ink); border: 1px solid var(--border); border-radius: 8px;
+  min-width: 40px; height: 36px; padding: 0 10px; cursor: pointer; }
+.mtools button.close { background: var(--ink); color: var(--surface); }
+.mplot { position: relative; flex: 1; min-height: 0; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 8px; }
+.more { display: block; margin: 12px auto 0; font: inherit; background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; padding: 8px 16px; cursor: pointer; }
+td.l { text-align: left; }
+.up { color: var(--ink); } .muted { color: var(--muted); }
 .card .note { color: var(--muted); font-size: 12px; margin: 0 0 6px; }
 .legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 6px; font-size: 12px; color: var(--ink-2); }
 .legend span { display: inline-flex; align-items: center; gap: 6px; }
@@ -108,7 +128,7 @@ td .key { display: inline-block; vertical-align: middle; margin-right: 6px; }
   <div class="tabs" role="tablist">
     <button role="tab" data-tab="price" aria-selected="true">매매가 추이</button>
     <button role="tab" data-tab="gap" aria-selected="false">우리집 대비 차이</button>
-    <button role="tab" data-tab="metric" aria-selected="false">지표·시나리오 이력</button>
+    <button role="tab" data-tab="history" aria-selected="false">실거래 이력</button>
   </div>
 
   <div class="layout">
@@ -126,26 +146,42 @@ td .key { display: inline-block; vertical-align: middle; margin-right: 6px; }
           <select id="win"><option value="3">3개월 이동 중위</option><option value="6" selected>6개월 이동 중위</option><option value="12">12개월 이동 중위</option></select></span>
         <span data-for="price"><label class="item" style="display:inline-flex"><input type="checkbox" id="dots" checked> 개별 거래 점</label></span>
         <span data-for="gap"><span class="flabel">차이 단위</span><span class="seg" id="unit"></span></span>
-        <span data-for="metric"><span class="flabel">지표</span><select id="metric"></select></span>
+        <span data-for="history"><span class="flabel">정렬</span>
+          <select id="sort"><option value="date">최신 거래순</option><option value="group">지역 → 단지 → 최신순</option></select></span>
       </div>
       <div class="panels" id="panels"></div>
+      <p class="sub" id="histSummary" hidden></p>
       <div class="tablewrap"><table id="table"></table></div>
       <p class="foot" id="foot"></p>
     </section>
   </div>
 </main>
 <div class="tip" id="tip" role="tooltip"></div>
+<div class="modal" id="modal" hidden role="dialog" aria-modal="true" aria-labelledby="mTitle">
+  <div class="mhead">
+    <h3 id="mTitle"></h3>
+    <span class="hint">두 손가락으로 확대·이동 · 마우스 휠로 확대 · 드래그로 이동</span>
+    <div class="mtools">
+      <button id="zIn" aria-label="확대">＋</button><button id="zOut" aria-label="축소">－</button>
+      <button id="zReset">원래대로</button><button id="mClose" class="close" aria-label="닫기">✕ 닫기</button>
+    </div>
+  </div>
+  <div class="legend" id="mLegend"></div>
+  <div class="mplot"><canvas id="mCanvas" role="img" aria-label="확대 차트"></canvas></div>
+</div>
 
 <script>
 const DATA = __DATA__;
 const $ = id => document.getElementById(id);
 const MONTH = 30.4375 * 864e5;
 const state = {
-  tab: 'price', years: 5, win: 6, dots: true, unit: 'won', metric: Object.keys(DATA.metrics)[0],
+  tab: 'price', years: 5, win: 6, dots: true, unit: 'won', sort: 'date',
   on: new Set(DATA.complexes.map(c => c.id)),
 };
 try { const s = JSON.parse(localStorage.getItem('fmh-state') || 'null');
   if (s) { Object.assign(state, s, {on: new Set(s.on.filter(id => DATA.complexes.some(c => c.id === id)))}); } } catch (e) {}
+if (!['price', 'gap', 'history'].includes(state.tab)) state.tab = 'price';
+if (window.ChartZoom) Chart.register(window.ChartZoom);
 function save() { try { localStorage.setItem('fmh-state', JSON.stringify({...state, on: [...state.on]})); } catch (e) {} }
 
 const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -160,11 +196,12 @@ function fmtWon(v, signed) {
   const a = Math.round(Math.abs(v)); const eok = Math.floor(a / 10000), man = a % 10000;
   return s + (eok ? eok + '억' + (man ? ' ' + man.toLocaleString() : '') : man.toLocaleString() + '만');
 }
-const fmtAxis = v => (v / 10000).toFixed(Math.abs(v) < 100000 && v % 10000 ? 1 : 0) + '억';
+const fmtAxis = v => String(+(v / 10000).toFixed(2)) + '억';  // 17.5억, 2.25억처럼 필요한 만큼만 소수
 const fmtMonth = t => { const d = new Date(t); return String(d.getFullYear()).slice(2) + '.' + String(d.getMonth() + 1).padStart(2, '0'); };
 // x축 눈금: 3년 이상은 매년 1월, 1년은 분기
 function xTicks(a, b) {
-  const out = []; const d = new Date(a); const every = state.years >= 3 ? 12 : 3;
+  const span = (b - a) / MONTH;
+  const out = []; const d = new Date(a); const every = span > 30 ? 12 : span > 10 ? 3 : 1;
   for (let y = d.getUTCFullYear(), m = 0; ; m += every) {
     const t = Date.UTC(y, m, 1); if (t > b) break; if (t >= a) out.push(t);
   }
@@ -201,12 +238,6 @@ function gapSeries(id) {
     return {x: p.x, y: state.unit === 'won' ? p.y - hv : (p.y / hv - 1) * 100};
   });
 }
-function metricSeries(id) {
-  const src = DATA.metrics[state.metric]; const s = (src && src.series[id]) || {};
-  const start = lastT - state.years * 12 * MONTH;
-  return Object.entries(s).map(([d, v]) => ({x: Date.parse(d), y: v})).filter(p => p.x >= start).sort((a, b) => a.x - b.x);
-}
-
 // ---------- 단지 선택 (지역별 일괄 체크) ----------
 function buildPicker() {
   const root = $('picker'); root.textContent = '';
@@ -255,7 +286,6 @@ function seg(el, opts, key) {
     b.addEventListener('click', () => { state[key] = v; seg(el, opts, key); render(); }); el.append(b);
   }
 }
-for (const [k, m] of Object.entries(DATA.metrics)) { const o = document.createElement('option'); o.value = k; o.textContent = m.label; $('metric').append(o); }
 
 // ---------- 차트 (지역별 small multiples, 공통 y축) ----------
 const charts = [];
@@ -281,26 +311,14 @@ function panelSeries(regionMembers) {
       line = trend(c.id);
       const start = lastT - state.years * 12 * MONTH;
       if (state.dots) dots = (DATA.trades[c.id] || []).filter(r => r[0] >= start);
-    } else if (state.tab === 'gap') line = gapSeries(c.id);
-    else line = metricSeries(c.id);
+    } else line = gapSeries(c.id);
     list.push({c, line, dots});
   }
   return list;
 }
 
-function render() {
-  save();
-  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
-  document.querySelectorAll('[data-for]').forEach(el => el.hidden = !el.dataset.for.split(' ').includes(state.tab));
-  $('win').value = String(state.win); $('dots').checked = state.dots; $('metric').value = state.metric;
-  charts.splice(0).forEach(c => c.destroy());
-  const root = $('panels'); root.textContent = '';
-  const panels = regions.map(r => ({r, members: DATA.complexes.filter(c => !c.home && c.region === r)}))
-    .filter(p => p.members.some(c => state.on.has(c.id)));
-  if (!panels.length) { const e = document.createElement('p'); e.className = 'empty'; e.textContent = '왼쪽에서 비교할 단지를 선택하세요.'; root.append(e); }
-
-  const built = panels.map(p => ({...p, series: panelSeries(p.members)}));
-  // 공통 y축 범위
+function scaleFor(built) {
+  // 공통 y축 범위: 범위에 맞는 1·2·5 단위 간격으로 바깥쪽 반올림
   let lo = Infinity, hi = -Infinity;
   for (const p of built) for (const s of p.series) {
     for (const pt of s.line) if (pt.y != null) { lo = Math.min(lo, pt.y); hi = Math.max(hi, pt.y); }
@@ -308,59 +326,168 @@ function render() {
   }
   if (state.tab === 'gap') { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
   if (!isFinite(lo)) { lo = 0; hi = 1; }
-  // 깔끔한 눈금: 범위에 맞는 1·2·5 단위 간격으로 바깥쪽 반올림
   const raw = (hi - lo) / 5 || 1, mag = Math.pow(10, Math.floor(Math.log10(raw)));
   const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw);
   lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
   if (hi === lo) hi = lo + step;
-  const xmin = lastT - state.years * 12 * MONTH, xmax = lastT + MONTH / 2;
+  return {lo, hi, step, xmin: lastT - state.years * 12 * MONTH, xmax: lastT + MONTH / 2};
+}
+
+function legendInto(el, series) {
+  el.textContent = '';
+  for (const s of series) { const sp = document.createElement('span'); const k = document.createElement('span');
+    k.className = 'key' + (s.c.home ? ' home' : ''); k.style.background = colorOf(s.c); const t = document.createElement('span');
+    t.textContent = s.c.name; sp.append(k, t); el.append(sp); }
+}
+
+function makeChart(cv, series, sc, zoomable) {
+  const datasets = [];
+  for (const s of series) {
+    const col = colorOf(s.c);
+    if (s.dots.length) datasets.push({type: 'scatter', data: s.dots.map(d => ({x: d[0], y: d[1], f: d[2]})), c: s.c, dots: true,
+      pointRadius: zoomable ? 3.5 : 2.5, pointHoverRadius: 5, pointBackgroundColor: col + '55', pointBorderWidth: 0, order: 2});
+    datasets.push({type: 'line', data: s.line, c: s.c, borderColor: col, borderWidth: s.c.home ? 3 : 2, pointRadius: 0,
+      tension: 0.25, spanGaps: 6 * MONTH, order: s.c.home ? 0 : 1, borderCapStyle: 'round', borderJoinStyle: 'round'});
+  }
+  const yPad = (sc.hi - sc.lo) * 0.5;
+  const ch = new Chart(cv, {
+    data: {datasets},
+    options: {
+      animation: false, responsive: true, maintainAspectRatio: false, parsing: false, normalized: true,
+      events: ['mousemove', 'mouseout', 'click', 'touchstart', 'touchmove'],
+      plugins: {
+        legend: {display: false}, tooltip: {enabled: false},
+        zoom: zoomable ? {
+          zoom: {wheel: {enabled: true, speed: 0.15}, pinch: {enabled: true}, mode: 'xy'},
+          pan: {enabled: true, mode: 'xy', threshold: 4},
+          limits: {x: {min: sc.xmin, max: sc.xmax, minRange: 2 * MONTH}, y: {min: sc.lo - yPad, max: sc.hi + yPad}},
+        } : false,
+      },
+      scales: {
+        x: {type: 'linear', min: sc.xmin, max: sc.xmax, grid: {color: css('--grid')}, border: {color: css('--axis')},
+          afterBuildTicks: ax => { ax.ticks = xTicks(ax.min, ax.max).map(value => ({value})); },
+          ticks: {color: css('--muted'), autoSkip: false, maxRotation: 0, callback: v => xLabel(v)}},
+        y: {min: sc.lo, max: sc.hi, grid: {color: css('--grid')}, border: {display: false},
+          ticks: {color: css('--muted'), maxTicksLimit: zoomable ? 10 : 7, ...(zoomable ? {} : {stepSize: sc.step}),
+            callback: (v, i, ticks) => {
+              // 확대 시 축 양 끝의 애매한 값(18.49억 등)은 숨김
+              if (zoomable && ticks.length > 3 && (i === 0 || i === ticks.length - 1)) {
+                const st = ticks[2].value - ticks[1].value;
+                if (Math.abs(Math.round(v / st) * st - v) > st * 1e-6) return '';
+              }
+              return state.tab === 'gap' && state.unit === 'pct' ? (+v).toFixed(0) + '%' : fmtAxis(v);
+            }}},
+      },
+      onHover: (e, _, chart) => hover(e, chart),
+    },
+    plugins: [crosshair, zeroLine],
+  });
+  ch.$zero = state.tab !== 'price';
+  cv.addEventListener('mouseleave', () => { ch.$hoverX = null; ch.draw(); $('tip').style.display = 'none'; });
+  return ch;
+}
+
+let modalChart = null;
+function openModal(p, sc) {
+  $('tip').style.display = 'none';
+  $('mTitle').textContent = p.r + (state.tab === 'gap' ? ' — 우리집 대비 차이' : ' — 매매가 추이');
+  legendInto($('mLegend'), p.series);
+  $('modal').hidden = false; document.body.style.overflow = 'hidden';
+  if (modalChart) modalChart.destroy();
+  modalChart = makeChart($('mCanvas'), p.series, sc, true);
+}
+function closeModal() {
+  $('modal').hidden = true; document.body.style.overflow = '';
+  $('tip').style.display = 'none';
+  if (modalChart) { modalChart.destroy(); modalChart = null; }
+}
+
+function render() {
+  save();
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
+  document.querySelectorAll('[data-for]').forEach(el => el.hidden = !el.dataset.for.split(' ').includes(state.tab));
+  $('win').value = String(state.win); $('dots').checked = state.dots; $('sort').value = state.sort;
+  charts.splice(0).forEach(c => c.destroy());
+  const root = $('panels'); root.textContent = '';
+  root.hidden = state.tab === 'history'; $('histSummary').hidden = state.tab !== 'history';
+  if (state.tab === 'history') { renderHistory(); return; }
+  const panels = regions.map(r => ({r, members: DATA.complexes.filter(c => !c.home && c.region === r)}))
+    .filter(p => p.members.some(c => state.on.has(c.id)));
+  if (!panels.length) { const e = document.createElement('p'); e.className = 'empty'; e.textContent = '왼쪽에서 비교할 단지를 선택하세요.'; root.append(e); }
+
+  const built = panels.map(p => ({...p, series: panelSeries(p.members)}));
+  const sc = scaleFor(built);
 
   for (const p of built) {
-    const card = document.createElement('div'); card.className = 'card';
-    const h = document.createElement('h3'); h.textContent = p.r;
+    const card = document.createElement('div'); card.className = 'card zoomable';
+    const h = document.createElement('h3'); const ht = document.createElement('span'); ht.textContent = p.r;
+    const ex = document.createElement('button'); ex.className = 'expand'; ex.textContent = '⤢ 크게 보기';
+    ex.setAttribute('aria-label', p.r + ' 차트 크게 보기'); h.append(ht, ex);
     const note = document.createElement('p'); note.className = 'note';
     note.textContent = state.tab === 'price' ? `점: 개별 실거래 · 선: ${state.win}개월 이동 중위값 · 굵은 선: 우리집`
-      : state.tab === 'gap' ? `비교단지 추세선 − 우리집 추세선 (${state.unit === 'won' ? '금액' : '%'}) · 0보다 위면 우리집보다 비쌈`
-      : DATA.metrics[state.metric].label;
-    const lg = document.createElement('div'); lg.className = 'legend';
-    for (const s of p.series) { const sp = document.createElement('span'); const k = document.createElement('span');
-      k.className = 'key' + (s.c.home ? ' home' : ''); k.style.background = colorOf(s.c); const t = document.createElement('span');
-      t.textContent = s.c.name; sp.append(k, t); lg.append(sp); }
+      : `비교단지 추세선 − 우리집 추세선 (${state.unit === 'won' ? '금액' : '%'}) · 0보다 위면 우리집보다 비쌈`;
+    const lg = document.createElement('div'); lg.className = 'legend'; legendInto(lg, p.series);
     const box = document.createElement('div'); box.className = 'plot'; const cv = document.createElement('canvas');
     cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', p.r + ' 차트 — 아래 표에서 같은 값을 볼 수 있습니다');
     box.append(cv); card.append(h, note, lg, box); root.append(card);
-
-    const datasets = [];
-    for (const s of p.series) {
-      const col = colorOf(s.c);
-      if (s.dots.length) datasets.push({type: 'scatter', data: s.dots.map(d => ({x: d[0], y: d[1], f: d[2]})), c: s.c, dots: true,
-        pointRadius: 2.5, pointHoverRadius: 4, pointBackgroundColor: col + '55', pointBorderWidth: 0, order: 2});
-      datasets.push({type: 'line', data: s.line, c: s.c, borderColor: col, borderWidth: s.c.home ? 3 : 2, pointRadius: 0,
-        tension: 0.25, spanGaps: state.tab === 'metric' ? 45 * 864e5 : 6 * MONTH, order: s.c.home ? 0 : 1, borderCapStyle: 'round', borderJoinStyle: 'round'});
-    }
-    const ch = new Chart(cv, {
-      data: {datasets},
-      options: {
-        animation: false, responsive: true, maintainAspectRatio: false, parsing: false, normalized: true,
-        events: ['mousemove', 'mouseout', 'touchstart', 'touchmove'],
-        plugins: {legend: {display: false}, tooltip: {enabled: false}},
-        scales: {
-          x: {type: 'linear', min: xmin, max: xmax, grid: {color: css('--grid')}, border: {color: css('--axis')},
-            afterBuildTicks: ax => { ax.ticks = xTicks(xmin, xmax).map(value => ({value})); },
-            ticks: {color: css('--muted'), autoSkip: false, maxRotation: 0, callback: v => xLabel(v)}},
-          y: {min: lo, max: hi, grid: {color: css('--grid')}, border: {display: false},
-            ticks: {color: css('--muted'), stepSize: step,
-              callback: v => state.tab === 'gap' && state.unit === 'pct' ? v.toFixed(0) + '%' : fmtAxis(v)}},
-        },
-        onHover: (e, _, chart) => hover(e, chart),
-      },
-      plugins: [crosshair, zeroLine],
-    });
-    ch.$zero = state.tab !== 'price';
-    cv.addEventListener('mouseleave', () => { ch.$hoverX = null; ch.draw(); $('tip').style.display = 'none'; });
-    charts.push(ch);
+    card.addEventListener('click', () => openModal(p, sc));
+    charts.push(makeChart(cv, p.series, sc, false));
   }
   renderTable(built);
+}
+
+// ---------- 실거래 이력 ----------
+let histLimit = 100;
+function renderHistory() {
+  const start = lastT - state.years * 12 * MONTH;
+  const order = new Map(DATA.complexes.map((c, i) => [c.id, i]));
+  const regionOrder = new Map([[home.region, -1], ...regions.map((r, i) => [r, i])]);
+  const hTrend = trend(home.id);
+  const homeAt = t => { let b = null; for (const p of hTrend) if (p.y != null && p.x <= t + MONTH / 2) b = p; return b && b.y; };
+  const rows = [];
+  for (const c of DATA.complexes) {
+    if (!state.on.has(c.id)) continue;
+    const ts = (DATA.trades[c.id] || []);
+    ts.forEach((r, i) => { if (r[0] >= start) rows.push({c, t: r[0], price: r[1], floor: r[2], area: r[3], prev: i ? ts[i - 1][1] : null}); });
+  }
+  const rk = c => c.home ? -1 : regionOrder.get(c.region);
+  rows.sort(state.sort === 'group'
+    ? (a, b) => rk(a.c) - rk(b.c) || order.get(a.c.id) - order.get(b.c.id) || b.t - a.t
+    : (a, b) => b.t - a.t || rk(a.c) - rk(b.c) || order.get(a.c.id) - order.get(b.c.id));
+  $('histSummary').textContent = `최근 ${state.years}년 매매 실거래 ${rows.length.toLocaleString()}건 · 선택한 ${new Set(rows.map(r => r.c.id)).size}개 단지 (해제 거래 제외, 설정한 전용면적만)`;
+
+  const tb = $('table'); tb.textContent = '';
+  const head = document.createElement('tr');
+  ['계약일', '지역', '단지', '전용', '층', '거래가', '직전 거래 대비', '우리집 시세 대비'].forEach((c, i) => {
+    const th = document.createElement('th'); th.textContent = c; if (i < 3) th.style.textAlign = 'left'; head.append(th); });
+  tb.append(head);
+  let lastGroup = null;
+  for (const r of rows.slice(0, histLimit)) {
+    const tr = document.createElement('tr');
+    const hv = homeAt(r.t);
+    const cells = [fmtDate(r.t), r.c.region, null, r.area ? r.area.toFixed(1) + '㎡' : '-', r.floor + '층', fmtWon(r.price),
+      r.prev ? fmtWon(r.price - r.prev, true) : '-', r.c.home ? '우리집' : hv ? fmtWon(r.price - hv, true) : '-'];
+    cells.forEach((v, i) => {
+      const td = document.createElement('td');
+      if (i < 3) td.className = 'l';
+      if (i === 2) { const k = document.createElement('span'); k.className = 'key' + (r.c.home ? ' home' : ''); k.style.background = colorOf(r.c);
+        const nm = document.createElement('span'); nm.textContent = r.c.name; td.append(k, nm); }
+      else td.textContent = v;
+      if (i === 5) td.style.fontWeight = '600';
+      tr.append(td);
+    });
+    if (state.sort === 'group' && lastGroup !== null && lastGroup !== r.c.id) tr.style.borderTop = '2px solid var(--axis)';
+    lastGroup = r.c.id;
+    tb.append(tr);
+  }
+  const more = document.getElementById('moreBtn'); if (more) more.remove();
+  if (rows.length > histLimit) {
+    const b = document.createElement('button'); b.id = 'moreBtn'; b.className = 'more';
+    b.textContent = `더 보기 (${(rows.length - histLimit).toLocaleString()}건 남음)`;
+    b.addEventListener('click', () => { histLimit += 200; renderHistory(); });
+    tb.parentElement.after(b);
+  }
+  $('foot').textContent = '직전 거래 대비 = 같은 단지 바로 앞 거래와의 차이 · 우리집 시세 대비 = 그 달 우리집 추세가(이동 중위값)와의 차이.';
 }
 
 function hover(e, chart) {
@@ -374,7 +501,7 @@ function hover(e, chart) {
   chart.$hoverX = chart.scales.x.getPixelForValue(best); chart.draw();
   tip.textContent = '';
   const title = document.createElement('div'); title.className = 't';
-  title.textContent = state.tab === 'metric' ? fmtDate(best) : fmtMonth(best).replace('.', '년 ') + '월';
+  title.textContent = fmtMonth(best).replace('.', '년 ') + '월';
   tip.append(title);
   const rows = lines.map(d => ({d, p: d.data.find(p => p.x === best)})).filter(r => r.p && r.p.y != null).sort((a, b) => b.p.y - a.p.y);
   for (const {d, p} of rows) {
@@ -403,11 +530,10 @@ function hover(e, chart) {
 function renderTable(built) {
   const tb = $('table'); tb.textContent = '';
   const head = document.createElement('tr');
-  const cols = state.tab === 'metric' ? ['단지', '최근 값', '1년 전', '변화']
-    : ['단지', '최근 추세가', '1년 전', '1년 변화', '우리집 대비', '1년 전 대비', '기간 거래'];
+  const cols = ['단지', '최근 추세가', '1년 전', '1년 변화', '우리집 대비', '1년 전 대비', '기간 거래'];
   cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; head.append(th); }); tb.append(head);
   const rows = [];
-  if (state.on.has(home.id) && state.tab !== 'metric') rows.push(home);
+  if (state.on.has(home.id)) rows.push(home);
   for (const p of built) for (const s of p.series) if (!s.c.home) rows.push(s.c);
   const last = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i].y != null) return arr[i]; return null; };
   const at = (arr, t) => { let b = null; for (const p of arr) if (p.y != null && p.x <= t) b = p; return b; };
@@ -415,10 +541,7 @@ function renderTable(built) {
   const hT = trend(home.id);
   for (const c of rows) {
     const tr = document.createElement('tr'); const cells = [];
-    if (state.tab === 'metric') {
-      const s = metricSeries(c.id); const a = last(s), b = at(s, yearAgo);
-      cells.push(fmtWon(a && a.y), fmtWon(b && b.y), a && b ? fmtWon(a.y - b.y, true) : '-');
-    } else {
+    {
       const t = trend(c.id); const a = last(t), b = at(t, yearAgo);
       const ha = last(hT), hb = at(hT, yearAgo);
       const start = lastT - state.years * 12 * MONTH;
@@ -432,18 +555,23 @@ function renderTable(built) {
     for (const v of cells) { const td = document.createElement('td'); td.textContent = v; tr.append(td); }
     tb.append(tr);
   }
-  $('foot').textContent = state.tab === 'metric' ? '지표 이력은 수집이 시작된 날부터 쌓입니다(호가는 매일, 실거래 기반 지표는 과거 재계산 포함).'
-    : `추세가 = 각 월 기준 최근 ${state.win}개월 실거래의 중위값. 6개월 넘게 거래가 없는 구간은 선을 끊어 표시합니다. 면적 범위는 config.yaml 기준.`;
+  const mb = document.getElementById('moreBtn'); if (mb) mb.remove();
+  $('foot').textContent = `추세가 = 각 월 기준 최근 ${state.win}개월 실거래의 중위값. 6개월 넘게 거래가 없는 구간은 선을 끊어 표시합니다. 면적 범위는 config.yaml 기준.`;
 }
 
 // ---------- 초기화 ----------
 $('homeName').textContent = home.name; $('updated').textContent = DATA.updated;
 seg($('range'), [[1, '1년'], [3, '3년'], [5, '5년']], 'years');
 seg($('unit'), [['won', '금액'], ['pct', '비율']], 'unit');
-document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { state.tab = b.dataset.tab; render(); }));
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { state.tab = b.dataset.tab; histLimit = 100; render(); }));
 $('win').addEventListener('change', e => { state.win = +e.target.value; render(); });
 $('dots').addEventListener('change', e => { state.dots = e.target.checked; render(); });
-$('metric').addEventListener('change', e => { state.metric = e.target.value; render(); });
+$('sort').addEventListener('change', e => { state.sort = e.target.value; histLimit = 100; render(); });
+$('zIn').addEventListener('click', () => modalChart && modalChart.zoom(1.3));
+$('zOut').addEventListener('click', () => modalChart && modalChart.zoom(0.77));
+$('zReset').addEventListener('click', () => modalChart && modalChart.resetZoom());
+$('mClose').addEventListener('click', closeModal);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').hidden) closeModal(); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { buildPicker(); render(); });
 if (matchMedia('(max-width: 860px)').matches) $('pickerBox').open = false;  // 세로 화면: 목록 접기
 buildPicker(); render();
