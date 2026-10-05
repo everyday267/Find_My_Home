@@ -59,6 +59,9 @@ jobs:
           ref: ${{ github.ref_name }}   # molit 잡이 푸시한 최신 데이터 위에서 실행
 
       - uses: actions/setup-python@v5
+        env:
+          # self-hosted(macOS)에서 기본 설치 경로(/Users/runner) 권한 오류 방지
+          AGENT_TOOLSDIRECTORY: ${{ runner.tool_cache }}
         with:
           python-version: "3.11"
 
@@ -71,7 +74,7 @@ jobs:
         run: python scripts/commit_data.py "호가 업데이트"
 
       - name: Job summary
-        if: always()
+        if: success()
         shell: python
         run: |
           import os, pathlib
