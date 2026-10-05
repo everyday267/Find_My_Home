@@ -29,25 +29,16 @@ targets:
     name: 마포더클래시 59
     lawd_cd: "11440"
     umd_nm: 아현동
-    apt_name: ["마포더클래시"]
+    apt_name: ["마포더클래시", "더클래시"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
 
-  - id: mapo_prestige_xi_1            # 3
-    name: 마포프레스티지자이 1단지 59
+  - id: mapo_prestige_xi_1            # 3 (국토부 데이터는 1·2단지 구분 없이 한 단지)
+    name: 마포프레스티지자이 59
     lawd_cd: "11440"
     umd_nm: 염리동
     apt_name: ["마포프레스티지자이", "마포프레스티지자이1단지"]
-    naver_complex_no: null
-    area_min: 59
-    area_max: 60.99
-
-  - id: mapo_prestige_xi_2            # 4
-    name: 마포프레스티지자이 2단지 59
-    lawd_cd: "11440"
-    umd_nm: 염리동
-    apt_name: ["마포프레스티지자이2단지"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -56,7 +47,7 @@ targets:
     name: 마포자이더센트리지 59
     lawd_cd: "11440"
     umd_nm: 염리동
-    apt_name: ["마포자이더센트리지", "마포더센트리지"]
+    apt_name: ["마포자이더센트리지", "마포자이더센트리지(102동~112동)"]  # 101동 리츠임대 제외
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -100,8 +91,8 @@ targets:
   - id: geumho_central_xi            # 10
     name: 금호센트럴자이 59
     lawd_cd: "11200"
-    umd_nm: 금호동2가
-    apt_name: ["금호센트럴자이"]
+    # 국토부 데이터상 이름이 "금호자이2차"로 추정(401세대·2012년 준공 동일), 법정동 표기가 달라 동 필터 생략
+    apt_name: ["금호센트럴자이", "금호자이2차"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -137,7 +128,7 @@ targets:
     name: e편한세상 옥수파크힐스 59
     lawd_cd: "11200"
     umd_nm: 옥수동
-    apt_name: ["e편한세상옥수파크힐스", "이편한세상옥수파크힐스"]
+    apt_name: ["e편한세상옥수파크힐스", "옥수파크힐스101동~116동", "옥수파크힐스117동~125동"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -164,7 +155,7 @@ targets:
     name: 가락쌍용1차 59
     lawd_cd: "11710"
     umd_nm: 가락동
-    apt_name: ["가락쌍용1차", "가락쌍용"]
+    apt_name: ["가락쌍용1차", "가락(1차)쌍용아파트"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -173,7 +164,7 @@ targets:
     name: 가락금호 59
     lawd_cd: "11710"
     umd_nm: 가락동
-    apt_name: ["가락금호", "금호"]
+    apt_name: ["가락금호", "가락금호아파트"]
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
