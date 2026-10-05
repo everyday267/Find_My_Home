@@ -58,14 +58,16 @@ jobs:
         with:
           ref: ${{ github.ref_name }}   # molit 잡이 푸시한 최신 데이터 위에서 실행
 
-      - uses: actions/setup-python@v5
-        env:
-          # self-hosted(macOS)에서 기본 설치 경로(/Users/runner) 권한 오류 방지
-          AGENT_TOOLSDIRECTORY: ${{ runner.tool_cache }}
-        with:
-          python-version: "3.11"
-
-      - run: python -m pip install -r requirements.txt
+      # PC에 설치된 Python으로 가상환경 생성 (setup-python은 macOS self-hosted에서 권한 오류)
+      - name: Set up Python venv
+        shell: bash
+        run: |
+          PY=$(command -v python3.13 || command -v python3.12 || command -v python3.11 || command -v python3)
+          "$PY" --version
+          "$PY" -m venv .venv
+          .venv/bin/python -m pip install -q --upgrade pip
+          .venv/bin/python -m pip install -q -r requirements.txt
+          echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Collect asking prices & compare
         run: python -m tracker run --skip-molit
