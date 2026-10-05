@@ -8,8 +8,7 @@ home:
   # 국토부 실거래 단지명 후보 (공백 무시 비교). 첫 실행 후 매칭이 안 되면
   # `python -m tracker find-apt 11290 --name 클라시아` 로 정확한 이름/apt_seq 확인
   apt_name: ["롯데캐슬클라시아", "길음역롯데캐슬클라시아"]
-  # 네이버 부동산 단지번호: new.land.naver.com/complexes/<번호> 의 숫자를 입력하면 호가 수집 시작
-  naver_complex_no: null
+  naver_complex_no: "126062"
   area_min: 59                # 24평형 = 전용 59㎡ 타입(59A/59B 등)
   area_max: 60.99
 
@@ -21,7 +20,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 아현동
     apt_name: ["마포래미안푸르지오", "마포래미안푸르지오1단지", "마포래미안푸르지오2단지", "마포래미안푸르지오3단지", "마포래미안푸르지오4단지"]
-    naver_complex_no: null
+    naver_complex_no: "104917"
     area_min: 59
     area_max: 60.99
 
@@ -30,7 +29,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 아현동
     apt_name: ["마포더클래시", "더클래시"]
-    naver_complex_no: null
+    naver_complex_no: "148651"
     area_min: 59
     area_max: 60.99
 
@@ -39,7 +38,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 염리동
     apt_name: ["마포프레스티지자이", "마포프레스티지자이1단지"]
-    naver_complex_no: null
+    naver_complex_no: "121608"
     area_min: 59
     area_max: 60.99
 
@@ -48,7 +47,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 염리동
     apt_name: ["마포자이더센트리지", "마포자이더센트리지(102동~112동)"]  # 101동 리츠임대 제외
-    naver_complex_no: null
+    naver_complex_no: "111249"
     area_min: 59
     area_max: 60.99
 
@@ -57,7 +56,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 공덕동
     apt_name: ["래미안공덕5차"]
-    naver_complex_no: null
+    naver_complex_no: "100627"
     area_min: 59
     area_max: 60.99
 
@@ -66,7 +65,7 @@ targets:
     lawd_cd: "11440"
     umd_nm: 아현동
     apt_name: ["공덕자이"]
-    naver_complex_no: null
+    naver_complex_no: "106861"
     area_min: 59
     area_max: 60.99
 
@@ -75,7 +74,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동1가
     apt_name: ["e편한세상금호파크힐스", "이편한세상금호파크힐스"]
-    naver_complex_no: null
+    naver_complex_no: "110936"
     area_min: 59
     area_max: 60.99
 
@@ -84,7 +83,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동2가
     apt_name: ["신금호파크자이"]
-    naver_complex_no: null
+    naver_complex_no: "110226"
     area_min: 59
     area_max: 60.99
 
@@ -93,7 +92,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동2가
     apt_name: ["금호센트럴자이", "금호자이1차"]   # 국토부 데이터상 이름은 "금호자이1차"
-    naver_complex_no: null
+    naver_complex_no: "100340"
     area_min: 59
     area_max: 60.99
 
@@ -102,7 +101,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동2가
     apt_name: ["래미안하이리버", "래미안금호하이리버"]
-    naver_complex_no: null
+    naver_complex_no: "27575"
     area_min: 59
     area_max: 60.99
 
@@ -111,7 +110,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동4가
     apt_name: ["서울숲푸르지오", "서울숲푸르지오1차", "서울숲1차푸르지오"]
-    naver_complex_no: null
+    naver_complex_no: "18541"
     area_min: 59
     area_max: 60.99
 
@@ -120,7 +119,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 금호동4가
     apt_name: ["서울숲푸르지오2차", "서울숲2차푸르지오"]
-    naver_complex_no: null
+    naver_complex_no: "101322"
     area_min: 59
     area_max: 60.99
 
@@ -129,7 +128,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 옥수동
     apt_name: ["e편한세상옥수파크힐스", "옥수파크힐스101동~116동", "옥수파크힐스117동~125동"]
-    naver_complex_no: null
+    naver_complex_no: "10938"
     area_min: 59
     area_max: 60.99
 
@@ -138,7 +137,7 @@ targets:
     lawd_cd: "11200"
     umd_nm: 옥수동
     apt_name: ["래미안옥수리버젠"]
-    naver_complex_no: null
+    naver_complex_no: "100692"
     area_min: 59
     area_max: 60.99
 
@@ -147,7 +146,7 @@ targets:
     lawd_cd: "11710"
     umd_nm: 송파동
     apt_name: ["래미안송파파인탑"]
-    naver_complex_no: null
+    naver_complex_no: "103139"
     area_min: 64
     area_max: 65.99
 
@@ -156,7 +155,7 @@ targets:
     lawd_cd: "11710"
     umd_nm: 가락동
     apt_name: ["가락쌍용1차", "가락(1차)쌍용아파트"]
-    naver_complex_no: null
+    naver_complex_no: "598"
     area_min: 59
     area_max: 60.99
 
@@ -165,7 +164,7 @@ targets:
     lawd_cd: "11710"
     umd_nm: 가락동
     apt_name: ["가락금호", "가락금호아파트"]
-    naver_complex_no: null
+    naver_complex_no: "594"
     area_min: 59
     area_max: 60.99
 
@@ -174,7 +173,7 @@ targets:
     lawd_cd: "11410"
     umd_nm: 북아현동
     apt_name: ["e편한세상신촌", "e편한세상신촌1단지", "e편한세상신촌2단지", "e편한세상신촌3단지", "e편한세상신촌4단지"]
-    naver_complex_no: null
+    naver_complex_no: "110209"
     area_min: 59
     area_max: 60.99
 
