@@ -1,0 +1,33 @@
+# 갈아타기 트래커 설정 (항목 설명은 config.example.yaml 참고)
+
+home:
+  id: home_classia59
+  name: 롯데캐슬 클라시아 59 (24평)
+  lawd_cd: "11290"            # 서울 성북구
+  umd_nm: 길음동
+  # 국토부 실거래 단지명 후보 (공백 무시 비교). 첫 실행 후 매칭이 안 되면
+  # `python -m tracker find-apt 11290 --name 클라시아` 로 정확한 이름/apt_seq 확인
+  apt_name: ["롯데캐슬클라시아", "길음역롯데캐슬클라시아"]
+  # 네이버 부동산 단지번호: new.land.naver.com/complexes/<번호> 의 숫자를 입력하면 호가 수집 시작
+  naver_complex_no: null
+  area_min: 59                # 24평형 = 전용 59㎡ 타입(59A/59B 등)
+  area_max: 60.99
+
+# 갈아탈 후보 단지 — 아래 형식으로 추가
+targets: []
+#  - id: target_a
+#    name: 후보단지 84
+#    lawd_cd: "11290"
+#    apt_name: "단지명"
+#    umd_nm: 법정동
+#    naver_complex_no: "12345"
+#    area_min: 84
+#    area_max: 85.99
+
+settings:
+  trade_lookback_months: 3
+  fetch_months: 3
+  naver_delay_sec: 1.5
+  naver_max_pages: 30
+  db_path: data/tracker.db
+  report_dir: reports
