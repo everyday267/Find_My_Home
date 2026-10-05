@@ -64,10 +64,45 @@ class Settings:
 
 
 @dataclass
+class Rules:
+    """대출·세금 규칙 (2026년 10월 기준 기본값, config의 finance.rules로 변경 가능)."""
+    ltv: float = 0.40  # 규제지역(서울 전역) LTV
+    # 주택가격별 주담대 상한 (만원): [가격 상한, 대출 상한], 마지막은 가격 상한 null
+    loan_caps: list = field(default_factory=lambda: [[150000, 60000], [250000, 40000], [None, 20000]])
+    gap_investment_allowed: bool = False  # 토지거래허가구역: 유주택자는 실거주 목적만 매수 허가
+    temporary_two_house: bool = True  # 일시적 2주택(종전주택 기한 내 처분) → 1주택 세율·비과세 적용
+    multi_house_acq_rate: float = 0.084  # 조정대상지역 2주택 취득세(8%) + 지방교육세(0.4%)
+    high_price_threshold: int = 120000  # 1세대1주택 양도세 비과세 고가주택 기준 (만원)
+    brokerage_vat: float = 0.10  # 중개수수료 부가세
+    misc_buy_rate: float = 0.002  # 법무사·채권할인·인지세 등 기타 매수 부대비용
+
+
+@dataclass
+class HomePurchase:
+    acquisition_price: int | None = None  # 우리집 취득가 (만원) — 양도세 계산에 필요
+    acquisition_date: str | None = None  # 취득일(잔금일) YYYY-MM-DD
+    residence_start: str | None = None  # 실거주 시작일 YYYY-MM-DD
+    acquisition_costs: int | None = None  # 취득 당시 취득세·중개비 등 필요경비 (만원, 없으면 추정)
+
+
+@dataclass
+class Finance:
+    cash: int = 0  # 현재 여유자금 (만원)
+    annual_savings: int = 0  # 연간 저축액 (만원)
+    current_loan: int = 0  # 우리집 현재 대출 잔액 (만원)
+    desired_loan: int = 0  # 실거주 갈아타기 시 희망 대출액 (만원)
+    horizon_years: int = 30
+    price_growth_rate: float = 0.0  # 연 가격 상승률 가정 (모든 단지 동일)
+    home: HomePurchase = field(default_factory=HomePurchase)
+    rules: Rules = field(default_factory=Rules)
+
+
+@dataclass
 class Config:
     home: Complex
     targets: list[Complex]
     settings: Settings
+    finance: Finance | None = None
 
     @property
     def complexes(self) -> list[Complex]:
@@ -121,4 +156,23 @@ def load_config(path: str | os.PathLike | None = None) -> Config:
     s = raw.get("settings") or {}
     known = Settings.__dataclass_fields__
     settings = Settings(**{k: v for k, v in s.items() if k in known})
-    return Config(home=home, targets=targets, settings=settings)
+    return Config(home=home, targets=targets, settings=settings, finance=_parse_finance(raw.get("finance")))
+
+
+def _pick(cls, raw: dict | None):
+    raw = raw or {}
+    unknown = set(raw) - set(cls.__dataclass_fields__)
+    if unknown:
+        raise ConfigError(f"finance 설정에 알 수 없는 항목: {', '.join(sorted(unknown))}")
+    return cls(**raw)
+
+
+def _parse_finance(raw: dict | None) -> Finance | None:
+    if not raw:
+        return None
+    raw = dict(raw)
+    home = _pick(HomePurchase, raw.pop("home", None))
+    rules = _pick(Rules, raw.pop("rules", None))
+    fin = _pick(Finance, raw)
+    fin.home, fin.rules = home, rules
+    return fin

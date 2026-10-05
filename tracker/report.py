@@ -4,8 +4,10 @@ from __future__ import annotations
 import csv
 import json
 import sqlite3
+from datetime import date
 from pathlib import Path
 
+from tracker import scenario
 from tracker.analysis import GAP_METRICS, METRIC_LABELS, gap_series, gap_signal
 from tracker.config import Config
 
@@ -112,6 +114,8 @@ def build_markdown(conn: sqlite3.Connection, cfg: Config, ds: str) -> str:
             )
         lines.append("")
 
+    lines += build_scenario_section(conn, cfg, ds)
+
     new_rows = []
     for cx in cfg.complexes:
         for r in conn.execute(
@@ -139,8 +143,108 @@ def build_markdown(conn: sqlite3.Connection, cfg: Config, ds: str) -> str:
     return "\n".join(lines)
 
 
+def build_scenario_section(conn: sqlite3.Connection, cfg: Config, ds: str) -> list[str]:
+    fin = cfg.finance
+    if not fin:
+        return []
+    rows = conn.execute("SELECT * FROM scenarios WHERE date=?", (ds,)).fetchall()
+    if not rows:
+        return []
+    by = {(r["target_id"], r["scenario"], r["basis"]): r for r in rows}
+    m = _metrics_for(conn, ds, cfg.home.id)
+    on = date.fromisoformat(ds)
+    rules = fin.rules
+    out = [
+        "## 갈아타기 자금 시나리오",
+        "",
+        f"가정: 여유자금 {fmt_won(fin.cash)} · 연 저축 {fmt_won(fin.annual_savings)} · 현재 대출 "
+        f"{fmt_won(fin.current_loan)} · 희망 대출 {fmt_won(fin.desired_loan)} · 가격 상승률 연 "
+        f"{fin.price_growth_rate:.0%} · 규제지역 LTV {rules.ltv:.0%} + 가격별 주담대 상한(15억↓ 6억 / 25억↓ 4억 / "
+        "25억↑ 2억). **실거래 기준**은 실거래 중위가로 사고팔 때, **호가 기준**은 우리집·대상 모두 최저호가로 거래할 때입니다.",
+        "",
+        "### 우리집 매도 시 손에 남는 돈",
+        "",
+        "| 기준 | 매도가 | 중개수수료 | 양도세 | 대출 상환 | 순자산 | 비고 |",
+        "|---|---|---|---|---|---|---|",
+    ]
+    for basis, label in scenario.BASES.items():
+        price = m.get("sale_trade_median") if basis == "trade" else m.get("sale_ask_min")
+        if not price:
+            continue
+        hs = scenario.home_sale(price, fin, on)
+        out.append(f"| {label} | {fmt_won(hs.price)} | {fmt_won(hs.brokerage)} | "
+                   f"{fmt_won(hs.cgt) if hs.cgt is not None else '?'} | {fmt_won(fin.current_loan)} | "
+                   f"**{fmt_won(hs.net_equity)}** | {hs.cgt_note} |")
+
+    trade_home = m.get("sale_trade_median")
+    if trade_home:
+        caps = [(y, scenario.max_affordable_price(fin, trade_home, on, y)) for y in (0, 3, 5, 10)]
+        out += ["", "**실거주 갈아타기로 살 수 있는 최대 매수가** (실거래 기준 매도, 대출 규제·부대비용 반영): "
+                + " · ".join(f"{'지금' if y == 0 else f'{y}년 후'} **{fmt_won(p)}**" for y, p in caps)]
+
+    def cell(r) -> str:
+        if r is None:
+            return "- | -"
+        return f"{fmt_won(r['surplus'], signed=True)} | {scenario.fmt_years(r['years_needed'], fin.horizon_years)}"
+
+    out += [
+        "",
+        "### ① 실거주 갈아타기 (우리집 매도 → 매수 후 입주)",
+        "",
+        "필요 자기자본 = 매수가 + 취득세·중개·기타 − 신규 대출. 가용자금 = 우리집 매도 순자산 + 여유자금. "
+        "여유(+)/부족(−)과 저축으로 부족분을 메우는 데 걸리는 기간입니다.",
+        "",
+        "| 단지 | 매수가(실거래) | 부대비용 | 대출 가능 | 필요 자기자본 | 여유/부족 (실거래) | 가능 시점 | "
+        "여유/부족 (호가) | 가능 시점 |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for t in cfg.targets:
+        r, a = by.get((t.id, "live", "trade")), by.get((t.id, "live", "ask"))
+        base = r or a
+        if not base:
+            continue
+        out.append(f"| {t.name} | {fmt_won(base['price'])} | {fmt_won(base['costs'])} | {fmt_won(base['loan'])} | "
+                   f"{fmt_won(base['required'])} | {cell(r)} | {cell(a)} |")
+
+    out += [
+        "",
+        "### ② 갭투자 후 실거주 (우리집 거주 유지 → 전세 끼고 매수 → 나중에 우리집 팔고 입주)",
+        "",
+    ]
+    if not rules.gap_investment_allowed:
+        out += ["> ⚠️ **현재 규제상 불가**: 서울 아파트는 토지거래허가구역으로 실거주 목적 매수만 허가되며, "
+                "임차인 있는 집 매수 시 실거주 유예도 무주택자에게만 적용됩니다(2027년 말까지). 아래는 규제 해제 시 참고용입니다.",
+                ""]
+    out += [
+        "필요 현금 = 매수가 − 전세가 + 취득세(일시적 2주택 1주택 세율)·중개·기타. 매수 시 대출 불가, 여유자금만 사용. "
+        "입주 시 부족액 = 전세금 반환액 − (우리집 매도 순자산 + 신규 대출 한도).",
+        "",
+        "| 단지 | 매수가 | 전세가 | 필요 현금 | 여유/부족 (실거래) | 가능 시점 | 여유/부족 (호가) | 가능 시점 | 입주 시 부족액 |",
+        "|---|---|---|---|---|---|---|---|---|",
+    ]
+    for t in cfg.targets:
+        r, a = by.get((t.id, "gap", "trade")), by.get((t.id, "gap", "ask"))
+        base = r or a
+        if not base:
+            continue
+        out.append(f"| {t.name} | {fmt_won(base['price'])} | {fmt_won(base['jeonse'])} | {fmt_won(base['required'])} | "
+                   f"{cell(r)} | {cell(a)} | {fmt_won(base['movein_shortfall']) if base['movein_shortfall'] else '없음'} |")
+    out += ["", "> 세금·대출은 2026년 10월 기준 단순화 계산입니다. DSR(소득 기준 대출 한도), 보유세, 이사비, "
+            "대출 이자 변화는 반영하지 않았습니다. 실제 거래 전 세무사·은행 확인이 필요합니다.", ""]
+    return out
+
+
 def export_csv(conn: sqlite3.Connection, cfg: Config, out_dir: Path) -> None:
     names = {c.id: c.name for c in cfg.complexes}
+    with open(out_dir / "scenario_history.csv", "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.writer(f)
+        w.writerow(["date", "target_id", "target_name", "scenario", "basis", "price", "jeonse", "costs", "loan",
+                    "required", "available", "surplus", "years_needed", "movein_shortfall"])
+        for r in conn.execute("SELECT * FROM scenarios ORDER BY date, target_id, scenario, basis"):
+            w.writerow([r["date"], r["target_id"], names.get(r["target_id"], ""), scenario.SCENARIOS[r["scenario"]],
+                        scenario.BASES[r["basis"]], *(r[k] for k in ("price", "jeonse", "costs", "loan", "required",
+                                                                     "available", "surplus", "years_needed",
+                                                                     "movein_shortfall"))])
     with open(out_dir / "gap_history.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["date", "target_id", "target_name", "metric", "metric_label",
@@ -213,8 +317,15 @@ def build_dashboard(conn: sqlite3.Connection, cfg: Config, ds: str) -> str:
     for r in conn.execute("SELECT date, complex_id, metric, value FROM metrics WHERE value IS NOT NULL"):
         if r["metric"] in values and r["complex_id"] in names:
             values[r["metric"]].setdefault(names[r["complex_id"]], {})[r["date"]] = r["value"]
+    labels = {m: METRIC_LABELS[m] for m in GAP_METRICS}
+    # 시나리오 여유(+)/부족(−) 추이: '갭' 차트에 표시
+    for r in conn.execute("SELECT date, target_id, scenario, basis, surplus FROM scenarios"):
+        key = f"scenario:{r['scenario']}:{r['basis']}"
+        labels.setdefault(key, f"{scenario.SCENARIOS[r['scenario']]} 여유/부족 ({scenario.BASES[r['basis']]})")
+        if r["target_id"] in names:
+            gaps.setdefault(key, {}).setdefault(names[r["target_id"]], {})[r["date"]] = r["surplus"]
     data = {"home": cfg.home.name, "updated": ds, "dates": dates,
-            "labels": {m: METRIC_LABELS[m] for m in GAP_METRICS}, "gaps": gaps, "values": values}
+            "labels": labels, "gaps": gaps, "values": values}
     payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
     return DASHBOARD_TEMPLATE.replace("__DATA__", payload)
 

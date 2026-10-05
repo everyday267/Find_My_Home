@@ -187,3 +187,49 @@ def test_naver_stops_after_consecutive_failures(tmp_path, monkeypatch):
     monkeypatch.setattr(naver, "NaverBrowser", lambda **kw: fake)
     errors = cli.collect_naver(db.connect(":memory:"), cfg, "2026-10-05")
     assert len(fake.calls) == 3 and "중단" in errors[-1] and fake.closed
+
+
+def _fin(**kw):
+    from tracker.config import Finance, HomePurchase
+    home = HomePurchase(acquisition_price=80000, acquisition_date="2022-01-27",
+                        residence_start="2022-01-27", acquisition_costs=3000)
+    return Finance(cash=10000, annual_savings=3000, current_loan=55000, desired_loan=55000, home=home, **kw)
+
+
+def test_acquisition_tax_and_fees():
+    from tracker import scenario as sc
+    r = _fin().rules
+    assert sc.acquisition_tax(150000, r) == pytest.approx(4950)  # 9억 초과 3% + 교육세 0.3%
+    assert sc.acquisition_tax(75000, r) == pytest.approx(1650)  # 7.5억 → 2% + 0.2%
+    assert sc.acquisition_tax(200000, r, multi_house=True) == pytest.approx(16800)
+    assert sc.brokerage_fee(200000, r) == pytest.approx(1540)  # 0.7% + VAT
+    assert sc.loan_limit(200000, r) == 40000 and sc.loan_limit(140000, r) == 56000
+    assert sc.loan_limit(300000, r) == 20000
+
+
+def test_capital_gains_tax_high_price_one_house():
+    from tracker import scenario as sc
+    tax, note = sc.capital_gains_tax(152000, _fin(), 1170, date(2026, 10, 5))
+    assert tax == pytest.approx(1944, abs=2) and "고가주택" in note
+    assert sc.capital_gains_tax(110000, _fin(), 900, date(2026, 10, 5))[0] == 0
+    from tracker.config import Finance
+    assert sc.capital_gains_tax(152000, Finance(), 0, date(2026, 10, 5))[0] is None
+
+
+def test_live_scenario_uses_regulated_loan():
+    from tracker import scenario as sc
+    fin = _fin()
+    res = sc.live_scenario(fin, 152000, 200000, date(2026, 10, 5), "trade")
+    assert res.loan == 40000 and "대출 규제" in res.note
+    assert res.surplus < 0 and res.years_needed is not None
+    # 여유 = 매도 순자산 + 현금 − (매수가 + 부대비용 − 대출)
+    sale = sc.home_sale(152000, fin, date(2026, 10, 5))
+    assert res.surplus == pytest.approx(sale.net_equity + 10000 - (200000 + res.costs - 40000))
+    assert sc.max_affordable_price(fin, 152000, date(2026, 10, 5)) < 200000
+
+
+def test_gap_scenario_flags_regulation():
+    from tracker import scenario as sc
+    res = sc.gap_scenario(_fin(), 152000, 200000, 80000, date(2026, 10, 5), "trade")
+    assert not res.allowed and res.loan == 0
+    assert res.required == pytest.approx(120000 + sc.buy_costs(200000, _fin().rules))

@@ -81,6 +81,17 @@ CREATE TABLE IF NOT EXISTS gaps (
     ratio        REAL,
     PRIMARY KEY (date, target_id, metric)
 );
+-- 갈아타기 자금 시나리오 결과 (live: 실거주 갈아타기, gap: 갭투자 / basis: trade 실거래, ask 호가)
+CREATE TABLE IF NOT EXISTS scenarios (
+    date        TEXT NOT NULL,
+    target_id   TEXT NOT NULL,
+    scenario    TEXT NOT NULL,   -- live / gap
+    basis       TEXT NOT NULL,   -- trade / ask
+    price       REAL, jeonse REAL, costs REAL, loan REAL,
+    required    REAL, available REAL, surplus REAL,
+    years_needed INTEGER, movein_shortfall REAL,
+    PRIMARY KEY (date, target_id, scenario, basis)
+);
 """
 
 

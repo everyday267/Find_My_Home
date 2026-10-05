@@ -5,7 +5,7 @@ import sqlite3
 from datetime import date, timedelta
 from statistics import median
 
-from tracker import db
+from tracker import db, scenario
 from tracker.config import Complex, Config
 
 METRIC_LABELS = {
@@ -137,6 +137,7 @@ def compute_day(conn: sqlite3.Connection, cfg: Config, day: date, include_asks: 
             m.update(ask_metrics(conn, cx, ds))
         db.upsert_metrics(conn, ds, cx.id, m)
     compute_gaps(conn, cfg, ds)
+    scenario.compute(conn, cfg, ds)
 
 
 def _metric(conn: sqlite3.Connection, ds: str, complex_id: str, metric: str) -> float | None:

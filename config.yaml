@@ -177,6 +177,23 @@ targets:
     area_min: 59
     area_max: 60.99
 
+# 갈아타기 자금 시나리오 (금액 단위: 만원)
+finance:
+  cash: 10000                # 현재 여유자금 1억
+  annual_savings: 3000       # 연 저축 3천만원
+  current_loan: 55000        # 우리집 대출 잔액 5.5억
+  desired_loan: 55000        # 갈아타기 시 희망 대출 (규제 한도를 넘으면 한도까지만 반영)
+  horizon_years: 30          # 몇 년까지 저축으로 메울 수 있는지 계산
+  price_growth_rate: 0.0     # 연 가격 상승률 가정 (모든 단지 동일, 예: 0.03)
+  home:                      # 우리집 양도세 계산용 — 입력 필요
+    acquisition_price: null  # 취득가(분양가 등, 만원)
+    acquisition_date: null   # 취득일(잔금일) YYYY-MM-DD
+    residence_start: null    # 실거주 시작일 YYYY-MM-DD
+    acquisition_costs: null  # 취득 시 취득세·중개비 등 (모르면 비워두면 추정)
+  # rules:                   # 규제 변경 시 덮어쓰기 (기본값은 2026년 10월 기준)
+  #   ltv: 0.4
+  #   loan_caps: [[150000, 60000], [250000, 40000], [null, 20000]]
+  #   gap_investment_allowed: false
 
 settings:
   trade_lookback_months: 6   # 실거래 중위가 계산 기간(개월)
