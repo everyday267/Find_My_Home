@@ -74,6 +74,9 @@ def fetch_articles(complex_no: str, trade_types: str = "A1:B1:B2", max_pages: in
             data = resp.json()
         except (requests.RequestException, ValueError) as e:
             raise NaverError(f"단지 {complex_no} 매물 조회 실패(page {page}): {e}") from e
+        if not isinstance(data, dict):
+            raise NaverError(f"단지 {complex_no} 예상치 못한 응답(page {page}): HTTP {resp.status_code} "
+                             f"{resp.headers.get('content-type')} {resp.text[:200]!r}")
         result = data.get("result") or {}
         articles = result.get("list") or []
         out.extend(parse_article(a) for a in articles if a.get("atclNo"))
@@ -81,3 +84,58 @@ def fetch_articles(complex_no: str, trade_types: str = "A1:B1:B2", max_pages: in
             break
         time.sleep(delay)
     return out
+
+
+PROBE_PAGE_HEADERS = {
+    "User-Agent": ("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 "
+                   "(KHTML, like Gecko) Chrome/126.0 Safari/537.36"),
+    "Accept-Language": "ko-KR,ko;q=0.9",
+}
+
+
+def probe(complex_no: str) -> list[str]:
+    """여러 네이버 부동산 엔드포인트 응답을 요약 (수집 방식 진단용)."""
+    s = requests.Session()
+    lines: list[str] = []
+
+    def hit(label: str, url: str, **kw) -> requests.Response | None:
+        try:
+            r = s.request(kw.pop("method", "GET"), url, timeout=20, **kw)
+        except requests.RequestException as e:
+            lines.append(f"[{label}] 오류 {e}")
+            return None
+        body = r.text.replace("\n", " ")
+        lines.append(f"[{label}] HTTP {r.status_code} {r.headers.get('content-type')} len={len(r.text)} "
+                     f"cookies={sorted(s.cookies.keys())} body={body[:300]!r}")
+        return r
+
+    params = {"hscpNo": complex_no, "tradTpCd": "A1", "order": "prc", "showR0": "N", "page": 1}
+    hit("m.land 쿠키없음", ARTICLE_URL, params=params, headers=HEADERS)
+    hit("m.land 메인", "https://m.land.naver.com/", headers=HEADERS)
+    hit("m.land 단지페이지", f"https://m.land.naver.com/complex/info/{complex_no}", headers=HEADERS)
+    hit("m.land 쿠키있음", ARTICLE_URL, params=params, headers=HEADERS)
+
+    page = hit("new.land 단지페이지", f"https://new.land.naver.com/complexes/{complex_no}", headers=PROBE_PAGE_HEADERS)
+    token = None
+    if page is not None:
+        m = re.search(r'"token"\s*:\s*"([A-Za-z0-9._-]+)"', page.text) or \
+            re.search(r"token\s*[:=]\s*['\"]([A-Za-z0-9._-]{40,})['\"]", page.text)
+        token = m.group(1) if m else None
+        lines.append(f"[new.land 토큰] {'발견' if token else '없음'}")
+    api = (f"https://new.land.naver.com/api/articles/complex/{complex_no}?realEstateType=APT&tradeType=A1"
+           f"&order=prc&page=1&complexNo={complex_no}&type=list")
+    api_headers = dict(PROBE_PAGE_HEADERS, Referer=f"https://new.land.naver.com/complexes/{complex_no}")
+    hit("new.land api 인증없음", api, headers=api_headers)
+    if token:
+        hit("new.land api 토큰", api, headers=dict(api_headers, authorization=f"Bearer {token}"))
+
+    hit("fin.land 단지페이지", f"https://fin.land.naver.com/complexes/{complex_no}", headers=PROBE_PAGE_HEADERS)
+    fin_headers = dict(PROBE_PAGE_HEADERS, Referer=f"https://fin.land.naver.com/complexes/{complex_no}",
+                       Origin="https://fin.land.naver.com")
+    hit("fin.land 단지정보", f"https://fin.land.naver.com/front-api/v1/complex?complexNumber={complex_no}",
+        headers=fin_headers)
+    hit("fin.land 매물목록", "https://fin.land.naver.com/front-api/v1/complex/article/list", method="POST",
+        headers=fin_headers, json={"complexNumber": complex_no, "tradeTypes": ["A1"], "pyeongTypes": [],
+                                   "dongNumbers": [], "userChannelType": "PC", "articleSortType": "PRICE_ASC",
+                                   "seed": "", "lastInfo": [], "size": 30})
+    return lines

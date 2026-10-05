@@ -198,6 +198,9 @@ def main(argv: list[str] | None = None) -> int:
     rp.add_argument("--date", help="리포트 기준일 (기본: 최신)")
     rp.add_argument("--recompute", metavar="YYYY-MM-DD", help="해당 날짜 지표/갭을 다시 계산 (설정 변경 후)")
 
+    pr = sub.add_parser("naver-probe", help="네이버 부동산 엔드포인트 응답 진단")
+    pr.add_argument("complex_no", nargs="?", default="126062")
+
     f = sub.add_parser("find-apt", help="시군구의 단지명·aptSeq·면적 조회 (config 작성용)")
     f.add_argument("lawd_cd", help="법정동코드 앞 5자리 (예: 11680 강남구)")
     f.add_argument("--month", help="조회 계약월 YYYYMM (기본: 이번 달)")
@@ -208,6 +211,10 @@ def main(argv: list[str] | None = None) -> int:
                         format="%(asctime)s %(levelname)s %(message)s")
     if args.command == "find-apt":
         return cmd_find_apt(args)
+    if args.command == "naver-probe":
+        for line in naver.probe(args.complex_no):
+            print(line)
+        return 0
     try:
         cfg = load_config(args.config)
     except ConfigError as e:
