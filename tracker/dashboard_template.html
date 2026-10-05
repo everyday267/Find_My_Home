@@ -324,7 +324,7 @@ function render() {
       if (s.dots.length) datasets.push({type: 'scatter', data: s.dots.map(d => ({x: d[0], y: d[1], f: d[2]})), c: s.c, dots: true,
         pointRadius: 2.5, pointHoverRadius: 4, pointBackgroundColor: col + '55', pointBorderWidth: 0, order: 2});
       datasets.push({type: 'line', data: s.line, c: s.c, borderColor: col, borderWidth: s.c.home ? 3 : 2, pointRadius: 0,
-        tension: 0.25, spanGaps: true, order: s.c.home ? 0 : 1, borderCapStyle: 'round', borderJoinStyle: 'round'});
+        tension: 0.25, spanGaps: state.tab === 'metric' ? 45 * 864e5 : 6 * MONTH, order: s.c.home ? 0 : 1, borderCapStyle: 'round', borderJoinStyle: 'round'});
     }
     const ch = new Chart(cv, {
       data: {datasets},
@@ -421,7 +421,7 @@ function renderTable(built) {
     tb.append(tr);
   }
   $('foot').textContent = state.tab === 'metric' ? '지표 이력은 수집이 시작된 날부터 쌓입니다(호가는 매일, 실거래 기반 지표는 과거 재계산 포함).'
-    : `추세가 = 각 월 기준 최근 ${state.win}개월 실거래의 중위값. 거래가 없는 구간은 선을 이어 그립니다. 면적 범위는 config.yaml 기준.`;
+    : `추세가 = 각 월 기준 최근 ${state.win}개월 실거래의 중위값. 6개월 넘게 거래가 없는 구간은 선을 끊어 표시합니다. 면적 범위는 config.yaml 기준.`;
 }
 
 // ---------- 초기화 ----------
