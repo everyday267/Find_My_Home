@@ -90,3 +90,57 @@ jobs:
           if p.exists() and os.environ.get("GITHUB_STEP_SUMMARY"):
               with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
                   f.write(p.read_text(encoding="utf-8"))
+
+  # 3) 대시보드를 비밀번호로 암호화해 Cloudflare Pages에 배포 (아이패드 등에서 보기)
+  #    Secrets: CLOUDFLARE_API_TOKEN, CLOUDFLARE_ACCOUNT_ID, DASHBOARD_PASSWORD — 없으면 건너뜀
+  deploy:
+    needs: [molit, naver]
+    if: always() && github.event.inputs.command != 'naver-probe'
+    runs-on: ubuntu-latest
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      DASHBOARD_PASSWORD: ${{ secrets.DASHBOARD_PASSWORD }}
+      # 고정 salt: 바뀌면 기기에 저장된 '기억하기'가 풀림 (비밀값 아님)
+      STATICRYPT_SALT: "da934e362feaef24c4f640140dbfa8e1"
+      PAGES_PROJECT: find-my-home
+    steps:
+      - name: Check secrets
+        id: check
+        run: |
+          if [ -z "$CLOUDFLARE_API_TOKEN" ] || [ -z "$CLOUDFLARE_ACCOUNT_ID" ] || [ -z "$DASHBOARD_PASSWORD" ]; then
+            echo "::notice::Cloudflare 또는 대시보드 비밀번호 Secret이 없어 배포를 건너뜁니다."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.check.outputs.skip != 'true'
+        with:
+          ref: ${{ github.ref_name }}   # 수집 잡들이 푸시한 최신 리포트
+
+      - uses: actions/setup-node@v4
+        if: steps.check.outputs.skip != 'true'
+        with:
+          node-version: "20"
+
+      - name: Encrypt dashboard
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          npx --yes staticrypt@3 reports/dashboard.html -p "$DASHBOARD_PASSWORD" -s "$STATICRYPT_SALT" \
+            -d site --remember 365 --short -c false \
+            --template-title "갈아타기 트래커" \
+            --template-instructions "가족 공유용 대시보드입니다. 비밀번호를 입력하세요." \
+            --template-button "열기" --template-placeholder "비밀번호" \
+            --template-remember "이 기기에서 기억하기" --template-error "비밀번호가 틀렸습니다" \
+            --template-color-primary "#0b0b0b" --template-color-secondary "#f9f9f7"
+          mv site/dashboard.html site/index.html
+          printf '/*\n  X-Robots-Tag: noindex, nofollow\n  Cache-Control: no-cache\n' > site/_headers
+          printf 'User-agent: *\nDisallow: /\n' > site/robots.txt
+
+      - name: Deploy to Cloudflare Pages
+        if: steps.check.outputs.skip != 'true'
+        run: |
+          npx --yes wrangler@3 pages project create "$PAGES_PROJECT" --production-branch=main 2>/dev/null || true
+          npx --yes wrangler@3 pages deploy site --project-name="$PAGES_PROJECT" --branch=main --commit-dirty=true | tee deploy.log
+          url=$(grep -oE 'https://[a-z0-9.-]+\.pages\.dev' deploy.log | tail -1)
+          echo "### 대시보드: https://${PAGES_PROJECT}.pages.dev (이번 배포: $url)" >> "$GITHUB_STEP_SUMMARY"

@@ -47,7 +47,12 @@ h1 { font-size: 20px; margin: 0 0 4px; }
 .side { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
   position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
 @media (max-width: 860px) { .side { position: static; max-height: none; } }
-.side h2 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 0 8px; }
+.side h2 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 0 8px; display: inline-flex; gap: 8px; width: calc(100% - 20px); }
+.side summary { cursor: pointer; list-style: none; }
+.side summary::-webkit-details-marker { display: none; }
+.side summary::after { content: "▾"; color: var(--muted); float: right; margin-top: 4px; }
+.side details:not([open]) summary::after { content: "▸"; }
+.side details:not([open]) h2 { margin-bottom: 4px; }
 .group { border-top: 1px solid var(--grid); padding: 8px 0; }
 .group:first-of-type { border-top: 0; }
 label.item { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 6px; cursor: pointer; }
@@ -108,8 +113,10 @@ td .key { display: inline-block; vertical-align: middle; margin-right: 6px; }
 
   <div class="layout">
     <aside class="side" aria-label="단지 선택">
-      <h2>단지 선택</h2>
-      <div id="picker"></div>
+      <details id="pickerBox" open>
+        <summary><h2>단지 선택 <span id="pickedCount" class="cnt"></span></h2></summary>
+        <div id="picker"></div>
+      </details>
     </aside>
 
     <section>
@@ -227,7 +234,12 @@ function buildPicker() {
   }
   syncRegions();
 }
+function syncCount() {
+  const n = DATA.complexes.filter(c => !c.home && state.on.has(c.id)).length;
+  $('pickedCount').textContent = n + '/' + (DATA.complexes.length - 1) + '개 선택';
+}
 function syncRegions() {
+  syncCount();
   document.querySelectorAll('input[data-region]').forEach(cb => {
     const m = DATA.complexes.filter(c => !c.home && c.region === cb.dataset.region);
     const k = m.filter(c => state.on.has(c.id)).length;
@@ -433,6 +445,7 @@ $('win').addEventListener('change', e => { state.win = +e.target.value; render()
 $('dots').addEventListener('change', e => { state.dots = e.target.checked; render(); });
 $('metric').addEventListener('change', e => { state.metric = e.target.value; render(); });
 matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { buildPicker(); render(); });
+if (matchMedia('(max-width: 860px)').matches) $('pickerBox').open = false;  // 세로 화면: 목록 접기
 buildPicker(); render();
 </script>
 </body>

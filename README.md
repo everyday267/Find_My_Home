@@ -88,6 +88,19 @@ python -m tracker run
 
 > self-hosted runner는 저장소의 워크플로를 PC에서 실행하므로 **반드시 비공개(Private) 저장소**에서만 사용하세요.
 
+## 아이패드·휴대폰에서 보기 (Cloudflare Pages)
+
+매일 수집이 끝나면 대시보드를 **비밀번호로 암호화(AES-256)** 해서 `https://find-my-home.pages.dev` 에 배포합니다.
+비밀번호 없이는 내용을 볼 수 없고, 검색엔진 수집도 막아둡니다. 한 번 입력하고 "이 기기에서 기억하기"를 체크하면 1년간 다시 묻지 않습니다.
+
+필요한 GitHub Secrets (없으면 배포 단계만 건너뜀):
+
+| 이름 | 값 |
+|---|---|
+| `CLOUDFLARE_ACCOUNT_ID` | Cloudflare 대시보드 → 계정 홈 → Account ID |
+| `CLOUDFLARE_API_TOKEN` | My Profile → API Tokens → Create Custom Token, 권한 `Account · Cloudflare Pages · Edit` |
+| `DASHBOARD_PASSWORD` | 대시보드 비밀번호 (12자 이상 권장, 다른 곳에서 쓰지 않는 것) |
+
 ## 갈아타기 자금 시나리오
 
 `config.yaml`의 `finance` 항목(여유자금, 연 저축, 대출, 우리집 취득가 등)을 채우면 매일 리포트에 다음이 추가됩니다.
