@@ -75,12 +75,13 @@ python -m tracker run
 1. PC에 [Python 3.11+](https://www.python.org/downloads/)과 Git 설치 (Windows는 설치 시 "Add python.exe to PATH" 체크)
 2. 저장소 **Settings → Actions → Runners → New self-hosted runner** 에서 PC의 OS 선택
 3. 화면에 나오는 **Download** 명령을 그대로 실행
-4. **Configure** 단계의 `config` 명령에 `--labels naver` 를 붙여 실행 (질문은 엔터로 기본값)
+4. **Configure** 단계의 `config` 명령에 `--labels naver` 를 붙여 실행 — 이어지는 질문(runner group, 이름 등)은 아무것도 입력하지 말고 **엔터만**
    - Windows: `./config.cmd --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
    - macOS/Linux: `./config.sh --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
 5. 부팅 시 자동 실행되도록 서비스로 등록
    - Windows: config 중 "run as service?" 질문에 `Y`
-   - macOS/Linux: `sudo ./svc.sh install && sudo ./svc.sh start`
+   - macOS: `./svc.sh install && ./svc.sh start` (sudo 없이)
+   - Linux: `sudo ./svc.sh install && sudo ./svc.sh start`
 6. Runners 목록에 초록색 **Idle** 로 보이면 완료 → Run workflow 에서 `naver` 로 테스트
 
 > self-hosted runner는 저장소의 워크플로를 PC에서 실행하므로 **반드시 비공개(Private) 저장소**에서만 사용하세요.
