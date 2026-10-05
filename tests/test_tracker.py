@@ -140,3 +140,18 @@ def test_unmatched_hint_suggests_similar_names():
     cx = Complex(id="x", name="래미안금호하이리버", lawd_cd="11200", apt_names=["래미안금호하이리버"], umd_nm="금호동2가")
     msg = unmatched_hint(cx, {("래미안하이리버", "금호동2가"), ("래미안옥수리버젠", "옥수동"), ("금호자이1차", "금호동2가")})
     assert "래미안하이리버(금호동2가)" in msg and "옥수리버젠" not in msg
+
+
+def test_naver_stops_after_consecutive_failures(tmp_path, monkeypatch):
+    from tracker import cli
+    cfg = make_cfg(tmp_path)
+    cfg.targets += [Complex(id=f"t{i}", name=f"t{i}", lawd_cd="11710", naver_complex_no=str(i)) for i in range(5)]
+    calls = []
+
+    def boom(no, **kw):
+        calls.append(no)
+        raise naver.NaverError(f"{no} timeout")
+
+    monkeypatch.setattr(naver, "fetch_articles", boom)
+    errors = cli.collect_naver(db.connect(":memory:"), cfg, "2026-10-05")
+    assert len(calls) == 3 and "중단" in errors[-1]
