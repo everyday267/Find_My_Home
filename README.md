@@ -62,7 +62,7 @@ python -m tracker run
 | 잡 | 실행 위치 | 하는 일 |
 |---|---|---|
 | `molit` | GitHub 서버 | 국토부 실거래 수집 (`run --skip-naver`) |
-| `naver` | 집 PC의 self-hosted runner (라벨 `naver`) | 네이버 호가 수집 (`run --skip-molit`) |
+| `naver` | 집 PC의 self-hosted runner | 네이버 호가 수집 (`run --skip-molit`) |
 
 네이버 부동산은 해외 IP(GitHub 서버)를 차단하므로 호가는 국내 IP의 PC에서 수집합니다.
 집 PC가 꺼져 있으면 `naver` 잡은 대기하다가 PC가 켜지면 실행됩니다(최대 24시간).
@@ -75,9 +75,7 @@ python -m tracker run
 1. PC에 [Python 3.11+](https://www.python.org/downloads/)과 Git 설치 (Windows는 설치 시 "Add python.exe to PATH" 체크)
 2. 저장소 **Settings → Actions → Runners → New self-hosted runner** 에서 PC의 OS 선택
 3. 화면에 나오는 **Download** 명령을 그대로 실행
-4. **Configure** 단계의 `config` 명령에 `--labels naver` 를 붙여 실행 — 이어지는 질문(runner group, 이름 등)은 아무것도 입력하지 말고 **엔터만**
-   - Windows: `./config.cmd --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
-   - macOS/Linux: `./config.sh --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
+4. **Configure** 단계의 `config` 명령을 실행 — 이어지는 질문(runner group, 이름 등)은 아무것도 입력하지 말고 **엔터만**
 5. 부팅 시 자동 실행되도록 서비스로 등록
    - Windows: config 중 "run as service?" 질문에 `Y`
    - macOS: `./svc.sh install && ./svc.sh start` (sudo 없이)

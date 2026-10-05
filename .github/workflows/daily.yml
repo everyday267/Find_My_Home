@@ -14,7 +14,7 @@ permissions:
   contents: write
 
 concurrency:
-  group: daily-tracking
+  group: daily-tracking-v2
   cancel-in-progress: false
 
 jobs:
@@ -47,11 +47,11 @@ jobs:
       - name: Commit data
         run: python scripts/commit_data.py "실거래 업데이트"
 
-  # 2) 네이버 호가 — 해외 IP가 차단되므로 집 PC의 self-hosted runner(라벨: naver)에서 실행
+  # 2) 네이버 호가 — 해외 IP가 차단되므로 집 PC의 self-hosted runner에서 실행
   naver:
     needs: molit
     if: always() && github.event.inputs.command != 'backfill'
-    runs-on: [self-hosted, naver]
+    runs-on: self-hosted
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
