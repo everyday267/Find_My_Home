@@ -102759,68 +102759,131 @@
 2026-10-04,singeumho_park_xi,신금호파크자이 59,sale_trade_last,매매 최근 실거래가,209000.0
 2026-10-04,singeumho_park_xi,신금호파크자이 59,sale_trade_median,매매 실거래 중위가,204500.0
 2026-10-04,singeumho_park_xi,신금호파크자이 59,wolse_trade_count,월세 실거래 건수,31.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_ask_count,전세 매물수,1.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_ask_median,전세 중위호가,90000.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_ask_min,전세 최저호가,90000.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_ratio,전세가율,0.3951749095295537
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_trade_count,전세 실거래 건수,45.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_trade_median,전세 실거래 중위가,81900.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_ask_count,매매 매물수,35.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_ask_median,매매 중위호가,218000.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_ask_min,매매 최저호가,207000.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_trade_count,매매 실거래 건수,14.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_trade_last,매매 최근 실거래가,216000.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_trade_median,매매 실거래 중위가,207250.0
+2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,wolse_ask_count,월세 매물수,6.0
 2026-10-05,eps_geumho_parkhills,e편한세상 금호파크힐스 59,wolse_trade_count,월세 실거래 건수,25.0
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_ask_count,전세 매물수,0.0
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_ask_median,전세 중위호가,
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_ask_min,전세 최저호가,
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_ratio,전세가율,0.3964130434782609
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_trade_count,전세 실거래 건수,48.0
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_trade_median,전세 실거래 중위가,91175.0
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_ask_count,매매 매물수,0.0
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_ask_median,매매 중위호가,
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_ask_min,매매 최저호가,
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_trade_count,매매 실거래 건수,15.0
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_trade_last,매매 최근 실거래가,227000.0
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_trade_median,매매 실거래 중위가,230000.0
+2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,wolse_ask_count,월세 매물수,0.0
 2026-10-05,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,wolse_trade_count,월세 실거래 건수,40.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_ask_count,전세 매물수,6.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_ask_median,전세 중위호가,87500.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_ask_min,전세 최저호가,80000.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_ratio,전세가율,0.438563829787234
 2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_trade_count,전세 실거래 건수,30.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,jeonse_trade_median,전세 실거래 중위가,82450.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_ask_count,매매 매물수,29.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_ask_median,매매 중위호가,208000.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_ask_min,매매 최저호가,190000.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_trade_count,매매 실거래 건수,8.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_trade_last,매매 최근 실거래가,196500.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,sale_trade_median,매매 실거래 중위가,188000.0
+2026-10-05,eps_sinchon,e편한세상 신촌 59,wolse_ask_count,월세 매물수,5.0
 2026-10-05,eps_sinchon,e편한세상 신촌 59,wolse_trade_count,월세 실거래 건수,12.0
+2026-10-05,garak_kumho,가락금호 59,jeonse_ask_count,전세 매물수,0.0
+2026-10-05,garak_kumho,가락금호 59,jeonse_ask_median,전세 중위호가,
+2026-10-05,garak_kumho,가락금호 59,jeonse_ask_min,전세 최저호가,
 2026-10-05,garak_kumho,가락금호 59,jeonse_ratio,전세가율,0.3330578512396694
 2026-10-05,garak_kumho,가락금호 59,jeonse_trade_count,전세 실거래 건수,28.0
 2026-10-05,garak_kumho,가락금호 59,jeonse_trade_median,전세 실거래 중위가,60450.0
+2026-10-05,garak_kumho,가락금호 59,sale_ask_count,매매 매물수,15.0
+2026-10-05,garak_kumho,가락금호 59,sale_ask_median,매매 중위호가,190000.0
+2026-10-05,garak_kumho,가락금호 59,sale_ask_min,매매 최저호가,180000.0
 2026-10-05,garak_kumho,가락금호 59,sale_trade_count,매매 실거래 건수,7.0
 2026-10-05,garak_kumho,가락금호 59,sale_trade_last,매매 최근 실거래가,181000.0
 2026-10-05,garak_kumho,가락금호 59,sale_trade_median,매매 실거래 중위가,181500.0
+2026-10-05,garak_kumho,가락금호 59,wolse_ask_count,월세 매물수,4.0
 2026-10-05,garak_kumho,가락금호 59,wolse_trade_count,월세 실거래 건수,19.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_ask_count,전세 매물수,5.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_ask_median,전세 중위호가,72000.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_ask_min,전세 최저호가,35000.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_ratio,전세가율,0.308411214953271
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_trade_count,전세 실거래 건수,27.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,jeonse_trade_median,전세 실거래 중위가,57750.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_ask_count,매매 매물수,22.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_ask_median,매매 중위호가,195000.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_ask_min,매매 최저호가,185000.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_trade_count,매매 실거래 건수,24.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_trade_last,매매 최근 실거래가,194000.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,sale_trade_median,매매 실거래 중위가,187250.0
+2026-10-05,garak_ssangyong1,가락쌍용1차 59,wolse_ask_count,월세 매물수,5.0
 2026-10-05,garak_ssangyong1,가락쌍용1차 59,wolse_trade_count,월세 실거래 건수,27.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_ask_count,전세 매물수,3.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_ask_median,전세 중위호가,82000.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_ask_min,전세 최저호가,82000.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_ratio,전세가율,0.40214477211796246
 2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_trade_count,전세 실거래 건수,11.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,jeonse_trade_median,전세 실거래 중위가,75000.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_ask_count,매매 매물수,9.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_ask_median,매매 중위호가,192000.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_ask_min,매매 최저호가,188000.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_trade_count,매매 실거래 건수,2.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_trade_last,매매 최근 실거래가,189000.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,sale_trade_median,매매 실거래 중위가,186500.0
+2026-10-05,geumho_central_xi,금호센트럴자이 59,wolse_ask_count,월세 매물수,1.0
 2026-10-05,geumho_central_xi,금호센트럴자이 59,wolse_trade_count,월세 실거래 건수,8.0
+2026-10-05,gongdeok_xi,공덕자이 59,jeonse_ask_count,전세 매물수,6.0
+2026-10-05,gongdeok_xi,공덕자이 59,jeonse_ask_median,전세 중위호가,86000.0
+2026-10-05,gongdeok_xi,공덕자이 59,jeonse_ask_min,전세 최저호가,85000.0
 2026-10-05,gongdeok_xi,공덕자이 59,jeonse_ratio,전세가율,0.3738738738738739
 2026-10-05,gongdeok_xi,공덕자이 59,jeonse_trade_count,전세 실거래 건수,13.0
 2026-10-05,gongdeok_xi,공덕자이 59,jeonse_trade_median,전세 실거래 중위가,83000.0
+2026-10-05,gongdeok_xi,공덕자이 59,sale_ask_count,매매 매물수,18.0
+2026-10-05,gongdeok_xi,공덕자이 59,sale_ask_median,매매 중위호가,229000.0
+2026-10-05,gongdeok_xi,공덕자이 59,sale_ask_min,매매 최저호가,215000.0
 2026-10-05,gongdeok_xi,공덕자이 59,sale_trade_count,매매 실거래 건수,3.0
 2026-10-05,gongdeok_xi,공덕자이 59,sale_trade_last,매매 최근 실거래가,225000.0
 2026-10-05,gongdeok_xi,공덕자이 59,sale_trade_median,매매 실거래 중위가,222000.0
+2026-10-05,gongdeok_xi,공덕자이 59,wolse_ask_count,월세 매물수,2.0
 2026-10-05,gongdeok_xi,공덕자이 59,wolse_trade_count,월세 실거래 건수,12.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_ask_count,전세 매물수,7.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_ask_median,전세 중위호가,80000.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_ask_min,전세 최저호가,75000.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_ratio,전세가율,0.43470394736842105
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_trade_count,전세 실거래 건수,36.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),jeonse_trade_median,전세 실거래 중위가,66075.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_ask_count,매매 매물수,12.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_ask_median,매매 중위호가,165000.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_ask_min,매매 최저호가,157000.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_trade_count,매매 실거래 건수,15.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_trade_last,매매 최근 실거래가,154500.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),sale_trade_median,매매 실거래 중위가,152000.0
+2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),wolse_ask_count,월세 매물수,6.0
 2026-10-05,home_classia59,롯데캐슬 클라시아 59 (24평),wolse_trade_count,월세 실거래 건수,10.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_ask_count,전세 매물수,6.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_ask_median,전세 중위호가,94000.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_ask_min,전세 최저호가,90000.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_ratio,전세가율,0.39215686274509803
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_trade_count,전세 실거래 건수,28.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_trade_median,전세 실거래 중위가,90000.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_ask_count,매매 매물수,14.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_ask_median,매매 중위호가,240000.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_ask_min,매매 최저호가,225000.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_trade_count,매매 실거래 건수,7.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_trade_last,매매 최근 실거래가,227000.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,sale_trade_median,매매 실거래 중위가,229500.0
+2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,wolse_ask_count,월세 매물수,7.0
 2026-10-05,mapo_prestige_xi_1,마포프레스티지자이 59,wolse_trade_count,월세 실거래 건수,15.0
 2026-10-05,mapo_prestige_xi_2,,jeonse_ratio,전세가율,
 2026-10-05,mapo_prestige_xi_2,,jeonse_trade_count,전세 실거래 건수,0.0
@@ -102829,73 +102892,143 @@
 2026-10-05,mapo_prestige_xi_2,,sale_trade_last,매매 최근 실거래가,
 2026-10-05,mapo_prestige_xi_2,,sale_trade_median,매매 실거래 중위가,
 2026-10-05,mapo_prestige_xi_2,,wolse_trade_count,월세 실거래 건수,0.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_ask_count,전세 매물수,15.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_ask_median,전세 중위호가,90000.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_ask_min,전세 최저호가,85000.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_ratio,전세가율,0.38967136150234744
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_trade_count,전세 실거래 건수,36.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_trade_median,전세 실거래 중위가,83000.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_ask_count,매매 매물수,50.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_ask_median,매매 중위호가,225000.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_ask_min,매매 최저호가,205000.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_trade_count,매매 실거래 건수,19.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_trade_last,매매 최근 실거래가,198000.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,sale_trade_median,매매 실거래 중위가,213000.0
+2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,wolse_ask_count,월세 매물수,8.0
 2026-10-05,mapo_raemian_prugio,마포래미안푸르지오 59,wolse_trade_count,월세 실거래 건수,51.0
+2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_ask_count,전세 매물수,23.0
+2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_ask_median,전세 중위호가,90000.0
+2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_ask_min,전세 최저호가,80000.0
 2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_ratio,전세가율,0.41904761904761906
 2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_trade_count,전세 실거래 건수,21.0
 2026-10-05,mapo_the_classy,마포더클래시 59,jeonse_trade_median,전세 실거래 중위가,88000.0
+2026-10-05,mapo_the_classy,마포더클래시 59,sale_ask_count,매매 매물수,54.0
+2026-10-05,mapo_the_classy,마포더클래시 59,sale_ask_median,매매 중위호가,225000.0
+2026-10-05,mapo_the_classy,마포더클래시 59,sale_ask_min,매매 최저호가,209000.0
 2026-10-05,mapo_the_classy,마포더클래시 59,sale_trade_count,매매 실거래 건수,17.0
 2026-10-05,mapo_the_classy,마포더클래시 59,sale_trade_last,매매 최근 실거래가,219000.0
 2026-10-05,mapo_the_classy,마포더클래시 59,sale_trade_median,매매 실거래 중위가,210000.0
+2026-10-05,mapo_the_classy,마포더클래시 59,wolse_ask_count,월세 매물수,28.0
 2026-10-05,mapo_the_classy,마포더클래시 59,wolse_trade_count,월세 실거래 건수,27.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_ask_count,전세 매물수,2.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_ask_median,전세 중위호가,90000.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_ask_min,전세 최저호가,90000.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_ratio,전세가율,0.4509283819628647
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_trade_count,전세 실거래 건수,15.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_trade_median,전세 실거래 중위가,85000.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_ask_count,매매 매물수,20.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_ask_median,매매 중위호가,222500.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_ask_min,매매 최저호가,200000.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_trade_count,매매 실거래 건수,2.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_trade_last,매매 최근 실거래가,192000.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,sale_trade_median,매매 실거래 중위가,188500.0
+2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,wolse_ask_count,월세 매물수,2.0
 2026-10-05,mapo_xi_the_centrige,마포자이더센트리지 59,wolse_trade_count,월세 실거래 건수,5.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_ask_count,전세 매물수,1.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_ask_median,전세 중위호가,82000.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_ask_min,전세 최저호가,82000.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_ratio,전세가율,0.3894736842105263
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_trade_count,전세 실거래 건수,22.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_trade_median,전세 실거래 중위가,74000.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_ask_count,매매 매물수,23.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_ask_median,매매 중위호가,210000.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_ask_min,매매 최저호가,189500.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_trade_count,매매 실거래 건수,3.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_trade_last,매매 최근 실거래가,186500.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,sale_trade_median,매매 실거래 중위가,190000.0
+2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,wolse_ask_count,월세 매물수,0.0
 2026-10-05,raemian_geumho_hiriver,래미안금호하이리버 59,wolse_trade_count,월세 실거래 건수,14.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_ask_count,전세 매물수,0.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_ask_median,전세 중위호가,
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_ask_min,전세 최저호가,
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_ratio,전세가율,0.39598997493734334
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_trade_count,전세 실거래 건수,13.0
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,jeonse_trade_median,전세 실거래 중위가,79000.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_ask_count,매매 매물수,10.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_ask_median,매매 중위호가,205000.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_ask_min,매매 최저호가,199000.0
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_trade_count,매매 실거래 건수,5.0
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_trade_last,매매 최근 실거래가,195000.0
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,sale_trade_median,매매 실거래 중위가,199500.0
+2026-10-05,raemian_gongdeok5,래미안공덕5차 59,wolse_ask_count,월세 매물수,0.0
 2026-10-05,raemian_gongdeok5,래미안공덕5차 59,wolse_trade_count,월세 실거래 건수,13.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_ask_count,전세 매물수,6.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_ask_median,전세 중위호가,96000.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_ask_min,전세 최저호가,85000.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_ratio,전세가율,0.38443935926773454
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_trade_count,전세 실거래 건수,33.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_trade_median,전세 실거래 중위가,84000.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_ask_count,매매 매물수,24.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_ask_median,매매 중위호가,237500.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_ask_min,매매 최저호가,220000.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_trade_count,매매 실거래 건수,11.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_trade_last,매매 최근 실거래가,225000.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_trade_median,매매 실거래 중위가,218500.0
+2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,wolse_ask_count,월세 매물수,5.0
 2026-10-05,raemian_oksu_riverzen,래미안옥수리버젠 59,wolse_trade_count,월세 실거래 건수,37.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_ask_count,전세 매물수,0.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_ask_median,전세 중위호가,
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_ask_min,전세 최저호가,
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_ratio,전세가율,0.38334883720930235
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_trade_count,전세 실거래 건수,16.0
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_trade_median,전세 실거래 중위가,82420.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_ask_count,매매 매물수,3.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_ask_median,매매 중위호가,224000.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_ask_min,매매 최저호가,222000.0
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_trade_count,매매 실거래 건수,7.0
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_trade_last,매매 최근 실거래가,225500.0
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,sale_trade_median,매매 실거래 중위가,215000.0
+2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,wolse_ask_count,월세 매물수,0.0
 2026-10-05,raemian_songpa_finetop,래미안송파파인탑 64,wolse_trade_count,월세 실거래 건수,7.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_ask_count,전세 매물수,2.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_ask_median,전세 중위호가,82000.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_ask_min,전세 최저호가,82000.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_ratio,전세가율,0.3658473479948254
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_trade_count,전세 실거래 건수,18.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_trade_median,전세 실거래 중위가,70700.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_ask_count,매매 매물수,10.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_ask_median,매매 중위호가,217500.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_ask_min,매매 최저호가,192000.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_trade_count,매매 실거래 건수,10.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_trade_last,매매 최근 실거래가,191000.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_trade_median,매매 실거래 중위가,193250.0
+2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,wolse_ask_count,월세 매물수,2.0
 2026-10-05,seoulforest_prugio1,서울숲푸르지오 1차 59,wolse_trade_count,월세 실거래 건수,12.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_ask_count,전세 매물수,1.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_ask_median,전세 중위호가,90000.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_ask_min,전세 최저호가,90000.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_ratio,전세가율,0.36363636363636365
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_trade_count,전세 실거래 건수,17.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_trade_median,전세 실거래 중위가,80000.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_ask_count,매매 매물수,8.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_ask_median,매매 중위호가,236000.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_ask_min,매매 최저호가,200000.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_trade_count,매매 실거래 건수,3.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_trade_last,매매 최근 실거래가,215000.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_trade_median,매매 실거래 중위가,220000.0
+2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,wolse_ask_count,월세 매물수,1.0
 2026-10-05,seoulforest_prugio2,서울숲푸르지오 2차 59,wolse_trade_count,월세 실거래 건수,17.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_ask_count,전세 매물수,4.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_ask_median,전세 중위호가,83000.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_ask_min,전세 최저호가,83000.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_ratio,전세가율,0.3908312958435208
 2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_trade_count,전세 실거래 건수,38.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,jeonse_trade_median,전세 실거래 중위가,79925.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_ask_count,매매 매물수,28.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_ask_median,매매 중위호가,210000.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_ask_min,매매 최저호가,202000.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_trade_count,매매 실거래 건수,4.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_trade_last,매매 최근 실거래가,209000.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,sale_trade_median,매매 실거래 중위가,204500.0
+2026-10-05,singeumho_park_xi,신금호파크자이 59,wolse_ask_count,월세 매물수,2.0
 2026-10-05,singeumho_park_xi,신금호파크자이 59,wolse_trade_count,월세 실거래 건수,31.0
