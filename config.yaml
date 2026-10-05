@@ -91,8 +91,8 @@ targets:
   - id: geumho_central_xi            # 10
     name: 금호센트럴자이 59
     lawd_cd: "11200"
-    # 국토부 데이터상 이름이 "금호자이2차"로 추정(401세대·2012년 준공 동일), 법정동 표기가 달라 동 필터 생략
-    apt_name: ["금호센트럴자이", "금호자이2차"]
+    umd_nm: 금호동2가
+    apt_name: ["금호센트럴자이", "금호자이1차"]   # 국토부 데이터상 이름은 "금호자이1차"
     naver_complex_no: null
     area_min: 59
     area_max: 60.99
@@ -143,13 +143,13 @@ targets:
     area_max: 60.99
 
   - id: raemian_songpa_finetop            # 16
-    name: 래미안송파파인탑 59
+    name: 래미안송파파인탑 64   # 59㎡ 타입이 없어 가장 가까운 64㎡(약 25평) 사용
     lawd_cd: "11710"
     umd_nm: 송파동
     apt_name: ["래미안송파파인탑"]
     naver_complex_no: null
-    area_min: 59
-    area_max: 60.99
+    area_min: 64
+    area_max: 65.99
 
   - id: garak_ssangyong1            # 17
     name: 가락쌍용1차 59
@@ -180,7 +180,7 @@ targets:
 
 
 settings:
-  trade_lookback_months: 3
+  trade_lookback_months: 6   # 실거래 중위가 계산 기간(개월)
   fetch_months: 3
   naver_delay_sec: 1.5
   naver_max_pages: 30
