@@ -140,7 +140,20 @@ jobs:
       - name: Deploy to Cloudflare Pages
         if: steps.check.outputs.skip != 'true'
         run: |
-          npx --yes wrangler@3 pages project create "$PAGES_PROJECT" --production-branch=main 2>/dev/null || true
+          set -o pipefail
+          # 복사 시 섞인 공백·줄바꿈 제거 후 형식 확인 (Account ID는 32자리 16진수)
+          export CLOUDFLARE_ACCOUNT_ID="$(printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | tr -d '[:space:]')"
+          export CLOUDFLARE_API_TOKEN="$(printf '%s' "$CLOUDFLARE_API_TOKEN" | tr -d '[:space:]')"
+          if ! printf '%s' "$CLOUDFLARE_ACCOUNT_ID" | grep -Eq '^[0-9a-f]{32}$'; then
+            echo "::error::CLOUDFLARE_ACCOUNT_ID 형식이 올바르지 않습니다 (32자리 영문소문자+숫자여야 함, 현재 ${#CLOUDFLARE_ACCOUNT_ID}자). Zone ID나 토큰 ID가 아닌 Account ID를 넣어주세요."
+            exit 1
+          fi
+          if ! npx --yes wrangler@3 pages project list > projects.log 2>&1; then
+            cat projects.log; echo "::error::Cloudflare API 접근 실패 — 토큰 권한(Account · Cloudflare Pages · Edit)과 Account ID를 확인하세요."; exit 1
+          fi
+          if ! grep -q "$PAGES_PROJECT" projects.log; then
+            npx --yes wrangler@3 pages project create "$PAGES_PROJECT" --production-branch=main
+          fi
           npx --yes wrangler@3 pages deploy site --project-name="$PAGES_PROJECT" --branch=main --commit-dirty=true | tee deploy.log
           url=$(grep -oE 'https://[a-z0-9.-]+\.pages\.dev' deploy.log | tail -1)
           echo "### 대시보드: https://${PAGES_PROJECT}.pages.dev (이번 배포: $url)" >> "$GITHUB_STEP_SUMMARY"
