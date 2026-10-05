@@ -66,12 +66,13 @@ jobs:
           "$PY" --version
           "$PY" -m venv .venv
           .venv/bin/python -m pip install -q --upgrade pip
-          .venv/bin/python -m pip install -q -r requirements.txt
+          .venv/bin/python -m pip install -q -r requirements.txt -r requirements-naver.txt
+          .venv/bin/python -m playwright install chromium   # 최초 1회 다운로드, 이후 캐시 사용
           echo "$PWD/.venv/bin" >> "$GITHUB_PATH"
 
       - name: Probe Naver endpoints
         if: github.event.inputs.command == 'naver-probe'
-        run: python -m tracker naver-probe
+        run: python -m tracker naver-probe --browser
 
       - name: Collect asking prices & compare
         if: github.event.inputs.command != 'naver-probe'

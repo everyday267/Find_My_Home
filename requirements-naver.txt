@@ -1,0 +1,2 @@
+# 네이버 호가 수집(self-hosted runner) 전용 — 실제 브라우저로 페이지를 열어 매물 데이터를 읽음
+playwright>=1.45

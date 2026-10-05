@@ -200,6 +200,7 @@ def main(argv: list[str] | None = None) -> int:
 
     pr = sub.add_parser("naver-probe", help="네이버 부동산 엔드포인트 응답 진단")
     pr.add_argument("complex_no", nargs="?", default="126062")
+    pr.add_argument("--browser", action="store_true", help="실제 브라우저(Playwright)로 진단")
 
     f = sub.add_parser("find-apt", help="시군구의 단지명·aptSeq·면적 조회 (config 작성용)")
     f.add_argument("lawd_cd", help="법정동코드 앞 5자리 (예: 11680 강남구)")
@@ -212,7 +213,8 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "find-apt":
         return cmd_find_apt(args)
     if args.command == "naver-probe":
-        for line in naver.probe(args.complex_no):
+        probe = naver.browser_probe if args.browser else naver.probe
+        for line in probe(args.complex_no):
             print(line)
         return 0
     try:

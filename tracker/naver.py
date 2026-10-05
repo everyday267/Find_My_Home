@@ -139,3 +139,51 @@ def probe(complex_no: str) -> list[str]:
                                    "dongNumbers": [], "userChannelType": "PC", "articleSortType": "PRICE_ASC",
                                    "seed": "", "lastInfo": [], "size": 30})
     return lines
+
+
+def browser_probe(complex_no: str, wait_ms: int = 8000) -> list[str]:
+    """실제 브라우저(Playwright)로 단지 매물 페이지를 열고 JSON 응답을 요약 (수집 방식 진단용)."""
+    from playwright.sync_api import sync_playwright
+
+    lines: list[str] = []
+    urls = [
+        f"https://fin.land.naver.com/complexes/{complex_no}?tab=article",
+        f"https://new.land.naver.com/complexes/{complex_no}?a=APT&e=RETAIL",
+    ]
+    with sync_playwright() as p:
+        browser = p.chromium.launch(headless=True)
+        ctx = browser.new_context(locale="ko-KR", user_agent=PROBE_PAGE_HEADERS["User-Agent"],
+                                  viewport={"width": 1400, "height": 900})
+        for url in urls:
+            page = ctx.new_page()
+            seen: list[str] = []
+
+            def on_response(resp, seen=seen):
+                ct = resp.headers.get("content-type", "")
+                if "json" not in ct:
+                    return
+                try:
+                    body = resp.text()
+                except Exception as e:  # noqa: BLE001
+                    body = f"<읽기 실패 {e}>"
+                req = resp.request
+                post = (req.post_data or "")[:300] if req.method == "POST" else ""
+                seen.append(f"  {req.method} {resp.status} {resp.url[:200]}"
+                            + (f"\n    POST={post!r}" if post else "")
+                            + f"\n    len={len(body)} body={body[:600]!r}")
+
+            page.on("response", on_response)
+            try:
+                page.goto(url, wait_until="domcontentloaded", timeout=45000)
+                page.wait_for_timeout(wait_ms)
+                for _ in range(3):
+                    page.mouse.wheel(0, 2000)
+                    page.wait_for_timeout(1500)
+                title = page.title()
+            except Exception as e:  # noqa: BLE001
+                title = f"<오류 {e}>"
+            lines.append(f"[브라우저] {url} title={title!r} JSON응답 {len(seen)}개")
+            lines.extend(seen[:40])
+            page.close()
+        browser.close()
+    return lines
