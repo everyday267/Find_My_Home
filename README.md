@@ -57,17 +57,33 @@ python -m tracker run
 
 ## 매일 자동 실행 (GitHub Actions)
 
-`.github/workflows/daily.yml` 이 매일 07:00(KST)에 `python -m tracker run` 을 실행하고
-`data/`, `reports/` 변경분을 커밋합니다.
+`.github/workflows/daily.yml` 이 매일 07:00(KST)에 두 잡을 순서대로 실행하고 `data/`, `reports/` 변경분을 커밋합니다.
 
-1. `config.yaml` 을 작성해 커밋 (개인 정보가 담기므로 **비공개 저장소** 권장)
-2. 저장소 Settings → Secrets and variables → Actions → `DATA_GO_KR_SERVICE_KEY` 등록
-3. Actions 탭 → daily-tracking → Run workflow 에서 `backfill` 로 최초 1회 실행
-4. 이후 매일 자동 실행, 실행 요약(Job summary)에 리포트가 표시됩니다
+| 잡 | 실행 위치 | 하는 일 |
+|---|---|---|
+| `molit` | GitHub 서버 | 국토부 실거래 수집 (`run --skip-naver`) |
+| `naver` | 집 PC의 self-hosted runner (라벨 `naver`) | 네이버 호가 수집 (`run --skip-molit`) |
 
-> 네이버 부동산은 해외 IP(GitHub 러너)나 잦은 요청을 차단할 수 있습니다. 호가 수집이 실패하면
-> 실거래만 기록되고 경고가 남습니다. 이 경우 집 PC/NAS에서 cron으로 실행하세요:
-> `0 7 * * * cd ~/Find_My_Home && DATA_GO_KR_SERVICE_KEY=... python3 -m tracker run && git add data reports && git commit -qm daily && git push -q`
+네이버 부동산은 해외 IP(GitHub 서버)를 차단하므로 호가는 국내 IP의 PC에서 수집합니다.
+집 PC가 꺼져 있으면 `naver` 잡은 대기하다가 PC가 켜지면 실행됩니다(최대 24시간).
+실거래는 PC와 관계없이 매일 수집됩니다.
+
+수동 실행: Actions → daily-tracking → Run workflow → `run`(전체) / `naver`(호가만) / `backfill`(실거래 24개월 재수집)
+
+### self-hosted runner 설치 (집 PC, 최초 1회)
+
+1. PC에 [Python 3.11+](https://www.python.org/downloads/)과 Git 설치 (Windows는 설치 시 "Add python.exe to PATH" 체크)
+2. 저장소 **Settings → Actions → Runners → New self-hosted runner** 에서 PC의 OS 선택
+3. 화면에 나오는 **Download** 명령을 그대로 실행
+4. **Configure** 단계의 `config` 명령에 `--labels naver` 를 붙여 실행 (질문은 엔터로 기본값)
+   - Windows: `./config.cmd --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
+   - macOS/Linux: `./config.sh --url https://github.com/<계정>/<저장소> --token <토큰> --labels naver`
+5. 부팅 시 자동 실행되도록 서비스로 등록
+   - Windows: config 중 "run as service?" 질문에 `Y`
+   - macOS/Linux: `sudo ./svc.sh install && sudo ./svc.sh start`
+6. Runners 목록에 초록색 **Idle** 로 보이면 완료 → Run workflow 에서 `naver` 로 테스트
+
+> self-hosted runner는 저장소의 워크플로를 PC에서 실행하므로 **반드시 비공개(Private) 저장소**에서만 사용하세요.
 
 ## 설정을 바꿨을 때
 

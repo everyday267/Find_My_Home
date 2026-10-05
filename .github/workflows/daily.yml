@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: "실행할 명령 (run / backfill)"
+        description: "실행할 명령 (run / backfill / naver)"
         default: run
         required: true
 
@@ -18,10 +18,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  track:
+  # 1) 국토부 실거래 — GitHub 서버에서 실행
+  molit:
+    if: github.event.inputs.command != 'naver'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -30,36 +34,48 @@ jobs:
 
       - run: pip install -r requirements.txt
 
-      - name: Check config
-        run: |
-          if [ ! -f config.yaml ]; then
-            echo "::error::config.yaml이 없습니다. config.example.yaml을 복사해 단지 정보를 입력하고 커밋하세요."
-            exit 1
-          fi
-
-      - name: Collect & compare
+      - name: Collect trades & compare
         env:
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
         run: |
           if [ "${{ github.event.inputs.command }}" = "backfill" ]; then
             python -m tracker backfill --months 24
           else
-            python -m tracker run
+            python -m tracker run --skip-naver
           fi
 
       - name: Commit data
-        run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data reports
-          if git diff --cached --quiet; then
-            echo "변경 없음"
-          else
-            git commit -m "data: $(TZ=Asia/Seoul date +%F) 실거래/호가 업데이트"
-            git push
-          fi
+        run: python scripts/commit_data.py "실거래 업데이트"
+
+  # 2) 네이버 호가 — 해외 IP가 차단되므로 집 PC의 self-hosted runner(라벨: naver)에서 실행
+  naver:
+    needs: molit
+    if: always() && github.event.inputs.command != 'backfill'
+    runs-on: [self-hosted, naver]
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}   # molit 잡이 푸시한 최신 데이터 위에서 실행
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - run: python -m pip install -r requirements.txt
+
+      - name: Collect asking prices & compare
+        run: python -m tracker run --skip-molit
+
+      - name: Commit data
+        run: python scripts/commit_data.py "호가 업데이트"
 
       - name: Job summary
         if: always()
+        shell: python
         run: |
-          if [ -f reports/latest.md ]; then cat reports/latest.md >> "$GITHUB_STEP_SUMMARY"; fi
+          import os, pathlib
+          p = pathlib.Path("reports/latest.md")
+          if p.exists() and os.environ.get("GITHUB_STEP_SUMMARY"):
+              with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as f:
+                  f.write(p.read_text(encoding="utf-8"))
