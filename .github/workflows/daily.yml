@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       command:
-        description: "실행할 명령 (run / backfill / naver / naver-probe)"
+        description: "실행할 명령 (run / backfill / naver / naver-probe / deploy)"
         default: run
         required: true
 
@@ -20,7 +20,7 @@ concurrency:
 jobs:
   # 1) 국토부 실거래 — GitHub 서버에서 실행
   molit:
-    if: github.event.inputs.command != 'naver' && github.event.inputs.command != 'naver-probe'
+    if: github.event.inputs.command != 'naver' && github.event.inputs.command != 'naver-probe' && github.event.inputs.command != 'deploy'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -50,7 +50,7 @@ jobs:
   # 2) 네이버 호가 — 해외 IP가 차단되므로 집 PC의 self-hosted runner에서 실행
   naver:
     needs: molit
-    if: always() && github.event.inputs.command != 'backfill'
+    if: always() && github.event.inputs.command != 'backfill' && github.event.inputs.command != 'deploy'
     runs-on: self-hosted
     timeout-minutes: 30
     steps:
