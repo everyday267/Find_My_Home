@@ -73,6 +73,8 @@ class Rules:
     temporary_two_house: bool = True  # 일시적 2주택(종전주택 기한 내 처분) → 1주택 세율·비과세 적용
     multi_house_acq_rate: float = 0.084  # 조정대상지역 2주택 취득세(8%) + 지방교육세(0.4%)
     high_price_threshold: int = 120000  # 1세대1주택 양도세 비과세 고가주택 기준 (만원)
+    dsr_limit: float = 0.40  # 은행권 DSR 한도
+    stress_rate: float = 0.03  # 수도권·규제지역 주담대 스트레스 금리 하한 (10.15 대책)
     brokerage_vat: float = 0.10  # 중개수수료 부가세
     misc_buy_rate: float = 0.002  # 법무사·채권할인·인지세 등 기타 매수 부대비용
 
@@ -83,6 +85,7 @@ class HomePurchase:
     acquisition_date: str | None = None  # 취득일(잔금일) YYYY-MM-DD
     residence_start: str | None = None  # 실거주 시작일 YYYY-MM-DD
     acquisition_costs: int | None = None  # 취득 당시 취득세·중개비 등 필요경비 (만원, 없으면 추정)
+    adjusted_area_at_acquisition: bool = False  # 취득 당시 조정대상지역이었으면 비과세에 2년 거주 요건
 
 
 @dataclass
@@ -93,6 +96,13 @@ class Finance:
     desired_loan: int = 0  # 실거주 갈아타기 시 희망 대출액 (만원)
     horizon_years: int = 30
     price_growth_rate: float = 0.0  # 연 가격 상승률 가정 (모든 단지 동일)
+    # 세전 연소득 목록 (DSR 계산): [{annual: 12000, start: null}, {annual: 4000, start: "2027-04-01"}]
+    incomes: list = field(default_factory=list)
+    # 연 저축액 변경 일정: [{start: "2027-04-01", annual_savings: 5000}]
+    savings_changes: list = field(default_factory=list)
+    other_debt_payment: int = 0  # 기존 주담대 외 다른 대출의 연간 원리금 (DSR 계산)
+    loan_rate: float = 0.04  # 신규 주담대 금리 가정
+    loan_years: int = 30  # 주담대 만기
     home: HomePurchase = field(default_factory=HomePurchase)
     rules: Rules = field(default_factory=Rules)
 

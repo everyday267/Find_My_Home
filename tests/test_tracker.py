@@ -220,8 +220,8 @@ def test_live_scenario_uses_regulated_loan():
     from tracker import scenario as sc
     fin = _fin()
     res = sc.live_scenario(fin, 152000, 200000, date(2026, 10, 5), "trade")
-    assert res.loan == 40000 and "대출 규제" in res.note
-    assert res.surplus < 0 and res.years_needed is not None
+    assert res.loan == 40000 and "대출 한도" in res.note
+    assert res.surplus < 0 and res.months_needed is not None
     # 여유 = 매도 순자산 + 현금 − (매수가 + 부대비용 − 대출)
     sale = sc.home_sale(152000, fin, date(2026, 10, 5))
     assert res.surplus == pytest.approx(sale.net_equity + 10000 - (200000 + res.costs - 40000))
@@ -233,3 +233,40 @@ def test_gap_scenario_flags_regulation():
     res = sc.gap_scenario(_fin(), 152000, 200000, 80000, date(2026, 10, 5), "trade")
     assert not res.allowed and res.loan == 0
     assert res.required == pytest.approx(120000 + sc.buy_costs(200000, _fin().rules))
+
+
+def _my_fin():
+    from tracker.config import Finance, HomePurchase
+    home = HomePurchase(acquisition_price=117000, acquisition_date="2025-08-31", residence_start="2025-08-31")
+    return Finance(cash=10000, annual_savings=3000, current_loan=55000, desired_loan=55000, home=home,
+                   incomes=[{"annual": 12000, "start": None}, {"annual": 4000, "start": "2027-04-01"}])
+
+
+def test_dsr_limit_with_stress_rate_and_spouse_income():
+    from tracker import scenario as sc
+    fin = _my_fin()
+    assert sc.dsr_loan_limit(fin, date(2026, 10, 5)) == pytest.approx(60124, rel=1e-3)
+    assert sc.dsr_loan_limit(fin, date(2027, 4, 1)) == pytest.approx(80166, rel=1e-3)
+    from tracker.config import Finance
+    assert sc.dsr_loan_limit(Finance(), date(2026, 10, 5)) is None
+    assert sc.purchase_loan(fin, 140000, date(2026, 10, 5)) == pytest.approx(55000)  # 희망액이 최소
+
+
+def test_short_term_sale_tax_drops_after_two_years():
+    from tracker import scenario as sc
+    fin = _my_fin()
+    now, _ = sc.capital_gains_tax(152000, fin, 1170, date(2026, 10, 5))
+    later, note = sc.capital_gains_tax(152000, fin, 1170, date(2027, 9, 1))
+    assert now == pytest.approx(19190, rel=0.01)  # 보유 2년 미만 60%
+    assert later == pytest.approx(930, rel=0.02) and "고가주택" in note
+
+
+def test_months_to_afford_reflects_tax_timing():
+    from tracker import scenario as sc
+    fin = _my_fin()
+    on = date(2026, 10, 5)
+    res = sc.live_scenario(fin, 152000, 150000, on, "trade")
+    # 지금은 단기 양도세 때문에 부족하지만 2년 보유(2027-09) 이후 가능
+    assert res.surplus < 0 and res.months_needed is not None
+    assert sc.add_months(on, res.months_needed) >= date(2027, 8, 31)
+    assert sc.fmt_when(res.months_needed, on, 30).endswith(f"({sc.add_months(on, res.months_needed):%Y-%m})")

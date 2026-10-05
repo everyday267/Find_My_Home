@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS scenarios (
     basis       TEXT NOT NULL,   -- trade / ask
     price       REAL, jeonse REAL, costs REAL, loan REAL,
     required    REAL, available REAL, surplus REAL,
-    years_needed INTEGER, movein_shortfall REAL,
+    months_needed INTEGER, movein_shortfall REAL,
     PRIMARY KEY (date, target_id, scenario, basis)
 );
 """
@@ -100,6 +100,9 @@ def connect(path: str | Path) -> sqlite3.Connection:
         Path(path).parent.mkdir(parents=True, exist_ok=True)
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(scenarios)")}
+    if cols and "months_needed" not in cols:
+        conn.execute("DROP TABLE scenarios")  # 파생 데이터 — 다음 계산 때 다시 채워짐
     conn.executescript(SCHEMA)
     return conn
 

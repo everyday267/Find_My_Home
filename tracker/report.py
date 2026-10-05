@@ -154,45 +154,56 @@ def build_scenario_section(conn: sqlite3.Connection, cfg: Config, ds: str) -> li
     m = _metrics_for(conn, ds, cfg.home.id)
     on = date.fromisoformat(ds)
     rules = fin.rules
+    dsr_now = scenario.dsr_loan_limit(fin, on)
+    income_steps = sorted({str(i.get("start")) for i in fin.incomes if i.get("start")})
+    dsr_txt = "소득 미입력(DSR 미반영)" if dsr_now is None else (
+        f"DSR 한도 지금 {fmt_won(dsr_now)}" + "".join(
+            f" → {d[:7]}부터 {fmt_won(scenario.dsr_loan_limit(fin, date.fromisoformat(d)))}" for d in income_steps))
     out = [
         "## 갈아타기 자금 시나리오",
         "",
         f"가정: 여유자금 {fmt_won(fin.cash)} · 연 저축 {fmt_won(fin.annual_savings)} · 현재 대출 "
         f"{fmt_won(fin.current_loan)} · 희망 대출 {fmt_won(fin.desired_loan)} · 가격 상승률 연 "
-        f"{fin.price_growth_rate:.0%} · 규제지역 LTV {rules.ltv:.0%} + 가격별 주담대 상한(15억↓ 6억 / 25억↓ 4억 / "
-        "25억↑ 2억). **실거래 기준**은 실거래 중위가로 사고팔 때, **호가 기준**은 우리집·대상 모두 최저호가로 거래할 때입니다.",
+        f"{fin.price_growth_rate:.0%} · 대출 = min(희망액, LTV {rules.ltv:.0%}, 가격별 상한 15억↓ 6억 / 25억↓ 4억 / "
+        f"25억↑ 2억, {dsr_txt} · 금리 {fin.loan_rate:.1%}+스트레스 {rules.stress_rate:.1%}, {fin.loan_years}년). "
+        "**실거래 기준**은 실거래 중위가로 사고팔 때, **호가 기준**은 우리집·대상 모두 최저호가로 거래할 때입니다.",
         "",
-        "### 우리집 매도 시 손에 남는 돈",
+        "### 우리집 매도 시점별 손에 남는 돈 (실거래 기준 가격)",
         "",
-        "| 기준 | 매도가 | 중개수수료 | 양도세 | 대출 상환 | 순자산 | 비고 |",
+        "| 매도 시점 | 매도가 | 중개수수료 | 양도세 | 대출 상환 | 순자산 | 비고 |",
         "|---|---|---|---|---|---|---|",
     ]
-    for basis, label in scenario.BASES.items():
-        price = m.get("sale_trade_median") if basis == "trade" else m.get("sale_ask_min")
-        if not price:
-            continue
-        hs = scenario.home_sale(price, fin, on)
-        out.append(f"| {label} | {fmt_won(hs.price)} | {fmt_won(hs.brokerage)} | "
-                   f"{fmt_won(hs.cgt) if hs.cgt is not None else '?'} | {fmt_won(fin.current_loan)} | "
-                   f"**{fmt_won(hs.net_equity)}** | {hs.cgt_note} |")
-
-    trade_home = m.get("sale_trade_median")
+    trade_home = m.get("sale_trade_median") or m.get("sale_ask_min")
+    h = fin.home
     if trade_home:
-        caps = [(y, scenario.max_affordable_price(fin, trade_home, on, y)) for y in (0, 3, 5, 10)]
-        out += ["", "**실거주 갈아타기로 살 수 있는 최대 매수가** (실거래 기준 매도, 대출 규제·부대비용 반영): "
-                + " · ".join(f"{'지금' if y == 0 else f'{y}년 후'} **{fmt_won(p)}**" for y, p in caps)]
+        points = [("지금", on)]
+        if h.acquisition_date:
+            acq = date.fromisoformat(h.acquisition_date)
+            for yrs, label in ((2, "2년 보유 후"), (3, "3년 보유 후")):
+                when = scenario.add_months(acq, yrs * 12 + 1)
+                if when > on:
+                    points.append((f"{label} ({when:%Y-%m})", when))
+        for label, when in points:
+            hs = scenario.home_sale(trade_home, fin, when)
+            out.append(f"| {label} | {fmt_won(hs.price)} | {fmt_won(hs.brokerage)} | "
+                       f"{fmt_won(hs.cgt) if hs.cgt is not None else '?'} | {fmt_won(fin.current_loan)} | "
+                       f"**{fmt_won(hs.net_equity)}** | {hs.cgt_note} |")
+        steps = [0, 12, 24, 36, 60]
+        caps = [(k, scenario.max_affordable_price(fin, trade_home, on, k)) for k in steps]
+        out += ["", "**실거주 갈아타기로 살 수 있는 최대 매수가** (그 시점 양도세·DSR·저축 반영, 가격 변동 없음): "
+                + " · ".join(f"{'지금' if k == 0 else f'{k // 12}년 후'} **{fmt_won(p)}**" for k, p in caps)]
 
     def cell(r) -> str:
         if r is None:
             return "- | -"
-        return f"{fmt_won(r['surplus'], signed=True)} | {scenario.fmt_years(r['years_needed'], fin.horizon_years)}"
+        return f"{fmt_won(r['surplus'], signed=True)} | {scenario.fmt_when(r['months_needed'], on, fin.horizon_years)}"
 
     out += [
         "",
         "### ① 실거주 갈아타기 (우리집 매도 → 매수 후 입주)",
         "",
         "필요 자기자본 = 매수가 + 취득세·중개·기타 − 신규 대출. 가용자금 = 우리집 매도 순자산 + 여유자금. "
-        "여유(+)/부족(−)과 저축으로 부족분을 메우는 데 걸리는 기간입니다.",
+        "여유(+)/부족(−)은 지금 바로 갈아탈 때, 가능 시점은 매월 저축·양도세 감소·소득 증가(DSR)를 반영해 처음 자금이 맞는 달입니다.",
         "",
         "| 단지 | 매수가(실거래) | 부대비용 | 대출 가능 | 필요 자기자본 | 여유/부족 (실거래) | 가능 시점 | "
         "여유/부족 (호가) | 가능 시점 |",
@@ -239,11 +250,11 @@ def export_csv(conn: sqlite3.Connection, cfg: Config, out_dir: Path) -> None:
     with open(out_dir / "scenario_history.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)
         w.writerow(["date", "target_id", "target_name", "scenario", "basis", "price", "jeonse", "costs", "loan",
-                    "required", "available", "surplus", "years_needed", "movein_shortfall"])
+                    "required", "available", "surplus", "months_needed", "movein_shortfall"])
         for r in conn.execute("SELECT * FROM scenarios ORDER BY date, target_id, scenario, basis"):
             w.writerow([r["date"], r["target_id"], names.get(r["target_id"], ""), scenario.SCENARIOS[r["scenario"]],
                         scenario.BASES[r["basis"]], *(r[k] for k in ("price", "jeonse", "costs", "loan", "required",
-                                                                     "available", "surplus", "years_needed",
+                                                                     "available", "surplus", "months_needed",
                                                                      "movein_shortfall"))])
     with open(out_dir / "gap_history.csv", "w", newline="", encoding="utf-8-sig") as f:
         w = csv.writer(f)

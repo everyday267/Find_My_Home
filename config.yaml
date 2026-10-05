@@ -185,11 +185,19 @@ finance:
   desired_loan: 55000        # 갈아타기 시 희망 대출 (규제 한도를 넘으면 한도까지만 반영)
   horizon_years: 30          # 몇 년까지 저축으로 메울 수 있는지 계산
   price_growth_rate: 0.0     # 연 가격 상승률 가정 (모든 단지 동일, 예: 0.03)
-  home:                      # 우리집 양도세 계산용 — 입력 필요
-    acquisition_price: null  # 취득가(분양가 등, 만원)
-    acquisition_date: null   # 취득일(잔금일) YYYY-MM-DD
-    residence_start: null    # 실거주 시작일 YYYY-MM-DD
-    acquisition_costs: null  # 취득 시 취득세·중개비 등 (모르면 비워두면 추정)
+  incomes:                   # 세전 연소득 (DSR 계산)
+    - {annual: 12000, start: null}            # 본인 1.2억
+    - {annual: 4000, start: "2027-04-01"}     # 배우자 복직 후 4천만원
+  savings_changes: []        # 저축액이 바뀌면 추가: - {start: "2027-04-01", annual_savings: 5000}
+  other_debt_payment: 0      # 주담대 외 다른 대출의 연간 원리금 (만원)
+  loan_rate: 0.04            # 신규 주담대 금리 가정 (DSR은 여기에 스트레스 금리 3%p 가산)
+  loan_years: 30
+  home:                      # 우리집 양도세 계산용
+    acquisition_price: 117000          # 취득가 11.7억
+    acquisition_date: "2025-08-31"     # 잔금일 (2025년 8월 — 정확한 날짜로 바꾸면 2년 시점이 정확해짐)
+    residence_start: "2025-08-31"      # 실거주 시작일 (잔금일과 같다고 가정)
+    acquisition_costs: null            # 취득 시 취득세·중개비 (비워두면 추정)
+    adjusted_area_at_acquisition: false  # 2025.8 취득 당시 성북구는 조정대상지역 아님 → 거주 요건 없음
   # rules:                   # 규제 변경 시 덮어쓰기 (기본값은 2026년 10월 기준)
   #   ltv: 0.4
   #   loan_caps: [[150000, 60000], [250000, 40000], [null, 20000]]
