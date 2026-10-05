@@ -39,7 +39,7 @@ jobs:
           DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
         run: |
           if [ "${{ github.event.inputs.command }}" = "backfill" ]; then
-            python -m tracker backfill --months 24
+            python -m tracker backfill --months 60
           else
             python -m tracker run --skip-naver
           fi

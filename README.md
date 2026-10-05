@@ -42,7 +42,11 @@ python -m tracker run
 결과물:
 - `data/tracker.db` — 전체 원천 데이터와 지표/갭 이력 (SQLite)
 - `reports/latest.md` — 오늘 현황, 우리집 대비 갭, 신규 신고 실거래
-- `reports/dashboard.html` — 갭 추이 차트 (브라우저로 열기)
+- `reports/dashboard.html` — 대시보드 (브라우저로 열기)
+  - **매매가 추이**: 최근 5년 개별 실거래(점) + 이동 중위 추세선, 지역별 패널에 우리집 함께 표시
+  - **우리집 대비 차이**: 비교단지 추세선 − 우리집 추세선 (금액/비율)
+  - **지표·시나리오 이력**: 호가 갭, 갈아타기 여유/부족 등 일별 지표
+  - 왼쪽 체크박스로 지역 단위 일괄 선택/해제, 단지별 선택 (선택 상태는 브라우저에 저장)
 - `reports/gap_history.csv`, `reports/metrics_history.csv` — 엑셀/구글시트용
 
 ## 준비물

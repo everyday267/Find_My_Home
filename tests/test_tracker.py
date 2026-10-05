@@ -270,3 +270,17 @@ def test_months_to_afford_reflects_tax_timing():
     assert res.surplus < 0 and res.months_needed is not None
     assert sc.add_months(on, res.months_needed) >= date(2027, 8, 31)
     assert sc.fmt_when(res.months_needed, on, 30).endswith(f"({sc.add_months(on, res.months_needed):%Y-%m})")
+
+
+def test_dashboard_data_groups_by_region(tmp_path):
+    cfg = make_cfg(tmp_path)
+    conn = db.connect(cfg.settings.db_path)
+    _load(conn, cfg)
+    analysis.compute_day(conn, cfg, date(2026, 10, 4))
+    data = report.build_dashboard_data(conn, cfg, "2026-10-04")
+    by = {c["id"]: c for c in data["complexes"]}
+    assert by["home"]["home"] and by["a"]["region"] == "송파구" and by["a"]["slot"] == 1
+    # 84㎡ 필터·해제거래 제외 → 우리집 15억 1건
+    assert [t[1] for t in data["trades"]["home"]] == [150000]
+    html = report.build_dashboard(conn, cfg, "2026-10-04")
+    assert "__DATA__" not in html and '"region":"송파구"' in html

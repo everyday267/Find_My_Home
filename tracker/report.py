@@ -4,7 +4,7 @@ from __future__ import annotations
 import csv
 import json
 import sqlite3
-from datetime import date
+from datetime import date, datetime, timedelta, timezone
 from pathlib import Path
 
 from tracker import scenario
@@ -272,73 +272,53 @@ def export_csv(conn: sqlite3.Connection, cfg: Config, out_dir: Path) -> None:
                         METRIC_LABELS.get(r["metric"], ""), r["value"]])
 
 
-DASHBOARD_TEMPLATE = """<!doctype html>
-<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>갈아타기 트래커</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-:root{--bg:#fff;--fg:#1f2328;--muted:#656d76;--card:#f6f8fa;--border:#d0d7de}
-@media (prefers-color-scheme:dark){:root{--bg:#0d1117;--fg:#e6edf3;--muted:#8d96a0;--card:#161b22;--border:#30363d}}
-body{margin:0;padding:16px;background:var(--bg);color:var(--fg);font-family:system-ui,-apple-system,"Apple SD Gothic Neo",sans-serif}
-main{max-width:1100px;margin:0 auto}h1{font-size:1.4rem}p{color:var(--muted)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:10px;padding:16px;margin:16px 0}
-select{font-size:1rem;padding:4px 8px}canvas{max-height:380px}
-</style></head><body><main>
-<h1>갈아타기 트래커</h1>
-<p>기준: <b id="home"></b> · 마지막 갱신 <span id="updated"></span> · 갭 = 비교단지 − 우리집 (만원)</p>
-<label>지표 <select id="metric"></select></label>
-<div class="card"><canvas id="gap"></canvas></div>
-<div class="card"><canvas id="price"></canvas></div>
-</main>
-<script>
-const DATA = __DATA__;
-const sel = document.getElementById('metric');
-document.getElementById('home').textContent = DATA.home;
-document.getElementById('updated').textContent = DATA.updated;
-for (const [k, label] of Object.entries(DATA.labels)) {
-  const o = document.createElement('option'); o.value = k; o.textContent = label; sel.appendChild(o);
-}
-const fmt = v => v == null ? '-' : (Math.abs(v) >= 10000 ? (v/10000).toFixed(2) + '억' : Math.round(v).toLocaleString() + '만');
-const opts = title => ({responsive:true, interaction:{mode:'index',intersect:false}, spanGaps:true,
-  plugins:{title:{display:true,text:title}, tooltip:{callbacks:{label:c => c.dataset.label + ': ' + fmt(c.parsed.y)}}},
-  scales:{x:{type:'category'}, y:{ticks:{callback:fmt}}}, elements:{point:{radius:0}}});
-let gapChart, priceChart;
-function render() {
-  const m = sel.value, dates = DATA.dates;
-  const gapSets = Object.entries(DATA.gaps[m] || {}).map(([name, s]) => ({label:name, data:dates.map(d => s[d] ?? null)}));
-  const priceSets = Object.entries(DATA.values[m] || {}).map(([name, s]) => ({label:name, data:dates.map(d => s[d] ?? null),
-    borderWidth: name === DATA.home ? 3 : 1.5}));
-  gapChart?.destroy(); priceChart?.destroy();
-  gapChart = new Chart(document.getElementById('gap'), {type:'line', data:{labels:dates, datasets:gapSets}, options:opts('우리집 대비 갭 — ' + DATA.labels[m])});
-  priceChart = new Chart(document.getElementById('price'), {type:'line', data:{labels:dates, datasets:priceSets}, options:opts('단지별 ' + DATA.labels[m])});
-}
-sel.addEventListener('change', render); render();
-</script></body></html>
-"""
+DASHBOARD_TEMPLATE = Path(__file__).with_name("dashboard_template.html")
+DASHBOARD_YEARS = 5
+MAX_SLOTS = 8  # 패널(지역)당 구분 가능한 색 수
+
+
+def _epoch_ms(d: str) -> int:
+    return int(datetime.fromisoformat(d).replace(tzinfo=timezone.utc).timestamp() * 1000)
+
+
+def build_dashboard_data(conn: sqlite3.Connection, cfg: Config, ds: str) -> dict:
+    complexes, per_region = [], {}
+    for cx in cfg.complexes:
+        slot = 0
+        if not cx.is_home:
+            per_region[cx.region] = per_region.get(cx.region, 0) + 1
+            slot = (per_region[cx.region] - 1) % MAX_SLOTS + 1
+        complexes.append({"id": cx.id, "name": cx.name, "region": cx.region, "home": cx.is_home, "slot": slot})
+
+    since = (date.fromisoformat(ds).replace(day=1) - timedelta(days=365 * DASHBOARD_YEARS + 31)).isoformat()
+    trades = {}
+    for cx in cfg.complexes:
+        rows = conn.execute(
+            "SELECT deal_date, price, floor FROM trades WHERE complex_id=? AND cancelled=0 AND deal_date>=? "
+            "AND deal_date<=? AND area BETWEEN ? AND ? ORDER BY deal_date",
+            (cx.id, since, ds, cx.area_min or 0, cx.area_max or 1e9),
+        ).fetchall()
+        trades[cx.id] = [[_epoch_ms(r["deal_date"]), r["price"], r["floor"]] for r in rows]
+
+    metrics = {}
+    for m in GAP_METRICS:
+        metrics[f"gap:{m}"] = {"label": f"우리집 대비 차이 — {METRIC_LABELS[m]}", "series": {}}
+    for r in conn.execute("SELECT date, target_id, metric, gap FROM gaps WHERE gap IS NOT NULL AND date>=?", (since,)):
+        key = f"gap:{r['metric']}"
+        if key in metrics:
+            metrics[key]["series"].setdefault(r["target_id"], {})[r["date"]] = r["gap"]
+    for r in conn.execute("SELECT date, target_id, scenario, basis, surplus FROM scenarios WHERE date>=?", (since,)):
+        key = f"scenario:{r['scenario']}:{r['basis']}"
+        metrics.setdefault(key, {"label": f"{scenario.SCENARIOS[r['scenario']]} 여유/부족 "
+                                          f"({scenario.BASES[r['basis']]})", "series": {}})
+        metrics[key]["series"].setdefault(r["target_id"], {})[r["date"]] = r["surplus"]
+    metrics = {k: v for k, v in metrics.items() if v["series"]}
+    return {"updated": ds, "complexes": complexes, "trades": trades, "metrics": metrics}
 
 
 def build_dashboard(conn: sqlite3.Connection, cfg: Config, ds: str) -> str:
-    names = {c.id: c.name for c in cfg.complexes}
-    dates = [r["date"] for r in conn.execute("SELECT DISTINCT date FROM metrics ORDER BY date")]
-    gaps: dict = {m: {} for m in GAP_METRICS}
-    for r in conn.execute("SELECT date, target_id, metric, gap FROM gaps WHERE gap IS NOT NULL"):
-        if r["metric"] in gaps and r["target_id"] in names:
-            gaps[r["metric"]].setdefault(names[r["target_id"]], {})[r["date"]] = r["gap"]
-    values: dict = {m: {} for m in GAP_METRICS}
-    for r in conn.execute("SELECT date, complex_id, metric, value FROM metrics WHERE value IS NOT NULL"):
-        if r["metric"] in values and r["complex_id"] in names:
-            values[r["metric"]].setdefault(names[r["complex_id"]], {})[r["date"]] = r["value"]
-    labels = {m: METRIC_LABELS[m] for m in GAP_METRICS}
-    # 시나리오 여유(+)/부족(−) 추이: '갭' 차트에 표시
-    for r in conn.execute("SELECT date, target_id, scenario, basis, surplus FROM scenarios"):
-        key = f"scenario:{r['scenario']}:{r['basis']}"
-        labels.setdefault(key, f"{scenario.SCENARIOS[r['scenario']]} 여유/부족 ({scenario.BASES[r['basis']]})")
-        if r["target_id"] in names:
-            gaps.setdefault(key, {}).setdefault(names[r["target_id"]], {})[r["date"]] = r["surplus"]
-    data = {"home": cfg.home.name, "updated": ds, "dates": dates,
-            "labels": labels, "gaps": gaps, "values": values}
-    payload = json.dumps(data, ensure_ascii=False).replace("</", "<\\/")
-    return DASHBOARD_TEMPLATE.replace("__DATA__", payload)
+    payload = json.dumps(build_dashboard_data(conn, cfg, ds), ensure_ascii=False, separators=(",", ":"))
+    return DASHBOARD_TEMPLATE.read_text(encoding="utf-8").replace("__DATA__", payload.replace("</", "<\\/"))
 
 
 def write_reports(conn: sqlite3.Connection, cfg: Config, ds: str | None = None) -> Path | None:

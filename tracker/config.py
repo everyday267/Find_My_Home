@@ -13,6 +13,16 @@ class ConfigError(Exception):
     pass
 
 
+# 법정동코드 앞 5자리 → 시군구명 (region 미지정 시 지역 분류에 사용)
+SEOUL_GU = {
+    "11110": "종로구", "11140": "중구", "11170": "용산구", "11200": "성동구", "11215": "광진구",
+    "11230": "동대문구", "11260": "중랑구", "11290": "성북구", "11305": "강북구", "11320": "도봉구",
+    "11350": "노원구", "11380": "은평구", "11410": "서대문구", "11440": "마포구", "11470": "양천구",
+    "11500": "강서구", "11530": "구로구", "11545": "금천구", "11560": "영등포구", "11590": "동작구",
+    "11620": "관악구", "11650": "서초구", "11680": "강남구", "11710": "송파구", "11740": "강동구",
+}
+
+
 def normalize_name(name: str | None) -> str:
     """단지명 비교용: 공백/괄호/특수문자 제거, 소문자화."""
     if not name:
@@ -32,6 +42,11 @@ class Complex:
     area_min: float | None = None  # 전용면적(㎡) 하한
     area_max: float | None = None  # 전용면적(㎡) 상한
     is_home: bool = False
+    region: str | None = None  # 대시보드 지역 분류 (없으면 시군구명)
+
+    def __post_init__(self) -> None:
+        if not self.region:
+            self.region = SEOUL_GU.get(self.lawd_cd, self.lawd_cd)
 
     def area_ok(self, area: float | None) -> bool:
         if area is None:
@@ -147,6 +162,7 @@ def _parse_complex(raw: dict, is_home: bool) -> Complex:
         area_min=float(raw["area_min"]) if raw.get("area_min") is not None else None,
         area_max=float(raw["area_max"]) if raw.get("area_max") is not None else None,
         is_home=is_home,
+        region=raw.get("region"),
     )
 
 

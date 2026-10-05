@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>갈아타기 트래커</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root {
+  color-scheme: light;
+  --page: #f9f9f7; --surface: #fcfcfb; --ink: #0b0b0b; --ink-2: #52514e; --muted: #898781;
+  --grid: #e1e0d9; --axis: #c3c2b7; --border: rgba(11,11,11,0.10); --wash: rgba(11,11,11,0.04);
+  --home: #0b0b0b;
+  --s1: #2a78d6; --s2: #eb6834; --s3: #1baf7a; --s4: #eda100;
+  --s5: #e87ba4; --s6: #008300; --s7: #4a3aa7; --s8: #e34948;
+}
+@media (prefers-color-scheme: dark) {
+  :root:where(:not([data-theme="light"])) {
+    color-scheme: dark;
+    --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+    --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+    --home: #ffffff;
+    --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+    --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0d0d0d; --surface: #1a1a19; --ink: #ffffff; --ink-2: #c3c2b7; --muted: #898781;
+  --grid: #2c2c2a; --axis: #383835; --border: rgba(255,255,255,0.10); --wash: rgba(255,255,255,0.05);
+  --home: #ffffff;
+  --s1: #3987e5; --s2: #d95926; --s3: #199e70; --s4: #c98500;
+  --s5: #d55181; --s6: #008300; --s7: #9085e9; --s8: #e66767;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--page); color: var(--ink);
+  font: 14px/1.5 system-ui, -apple-system, "Apple SD Gothic Neo", "Segoe UI", sans-serif; }
+main { max-width: 1280px; margin: 0 auto; padding: 20px 16px 48px; }
+h1 { font-size: 20px; margin: 0 0 4px; }
+.sub { color: var(--ink-2); margin: 0 0 16px; }
+.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--grid); margin-bottom: 16px; overflow-x: auto; }
+.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; color: var(--ink-2);
+  padding: 8px 12px; font: inherit; cursor: pointer; white-space: nowrap; }
+.tabs button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--ink); font-weight: 600; }
+.layout { display: grid; grid-template-columns: 260px 1fr; gap: 16px; align-items: start; }
+@media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+.side { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px;
+  position: sticky; top: 12px; max-height: calc(100vh - 24px); overflow: auto; }
+@media (max-width: 860px) { .side { position: static; max-height: none; } }
+.side h2 { font-size: 13px; color: var(--muted); font-weight: 600; margin: 4px 0 8px; }
+.group { border-top: 1px solid var(--grid); padding: 8px 0; }
+.group:first-of-type { border-top: 0; }
+label.item { display: flex; align-items: center; gap: 8px; padding: 3px 4px; border-radius: 6px; cursor: pointer; }
+label.item:hover { background: var(--wash); }
+label.region { font-weight: 600; }
+.cnt { color: var(--muted); font-weight: 400; font-size: 12px; margin-left: auto; }
+.key { width: 14px; height: 2px; border-radius: 1px; flex: none; }
+.key.home { height: 3px; }
+input[type=checkbox] { accent-color: var(--ink); margin: 0; flex: none; }
+.items { padding-left: 18px; }
+.filters { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; margin-bottom: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { background: var(--surface); border: 0; border-left: 1px solid var(--border); color: var(--ink-2);
+  padding: 5px 10px; font: inherit; cursor: pointer; }
+.seg button:first-child { border-left: 0; }
+.seg button[aria-pressed="true"] { background: var(--ink); color: var(--surface); }
+.flabel { color: var(--muted); font-size: 12px; margin-right: 4px; }
+select { font: inherit; background: var(--surface); color: var(--ink); border: 1px solid var(--border);
+  border-radius: 8px; padding: 4px 8px; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 16px; }
+@media (max-width: 520px) { .panels { grid-template-columns: 1fr; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 12px 12px 8px; }
+.card h3 { font-size: 15px; margin: 0 0 2px; }
+.card .note { color: var(--muted); font-size: 12px; margin: 0 0 6px; }
+.legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 6px; font-size: 12px; color: var(--ink-2); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.plot { position: relative; height: 300px; }
+.empty { color: var(--muted); padding: 40px 0; text-align: center; }
+.tip { position: fixed; pointer-events: none; z-index: 10; background: var(--surface); color: var(--ink);
+  border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-size: 12px;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12); min-width: 180px; display: none; }
+.tip .t { color: var(--muted); margin-bottom: 4px; }
+.tip .r { display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+.tip .v { font-weight: 600; font-variant-numeric: tabular-nums; }
+.tip .n { color: var(--ink-2); }
+.tip .trade { border-top: 1px solid var(--grid); margin-top: 4px; padding-top: 4px; color: var(--ink-2); }
+table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 10px; overflow: hidden; margin-top: 16px; font-size: 13px; }
+th, td { padding: 6px 10px; text-align: right; border-top: 1px solid var(--grid); font-variant-numeric: tabular-nums; }
+th { color: var(--muted); font-weight: 600; background: var(--surface); border-top: 0; }
+td:first-child, th:first-child { text-align: left; }
+td .key { display: inline-block; vertical-align: middle; margin-right: 6px; }
+.tablewrap { overflow-x: auto; }
+.foot { color: var(--muted); font-size: 12px; margin-top: 12px; }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <h1>갈아타기 트래커</h1>
+  <p class="sub">기준 <b id="homeName"></b> · 마지막 갱신 <span id="updated"></span> · 국토부 실거래(해제 거래 제외) 기준</p>
+
+  <div class="tabs" role="tablist">
+    <button role="tab" data-tab="price" aria-selected="true">매매가 추이</button>
+    <button role="tab" data-tab="gap" aria-selected="false">우리집 대비 차이</button>
+    <button role="tab" data-tab="metric" aria-selected="false">지표·시나리오 이력</button>
+  </div>
+
+  <div class="layout">
+    <aside class="side" aria-label="단지 선택">
+      <h2>단지 선택</h2>
+      <div id="picker"></div>
+    </aside>
+
+    <section>
+      <div class="filters">
+        <span><span class="flabel">기간</span><span class="seg" id="range"></span></span>
+        <span data-for="price gap"><span class="flabel">추세선</span>
+          <select id="win"><option value="3">3개월 이동 중위</option><option value="6" selected>6개월 이동 중위</option><option value="12">12개월 이동 중위</option></select></span>
+        <span data-for="price"><label class="item" style="display:inline-flex"><input type="checkbox" id="dots" checked> 개별 거래 점</label></span>
+        <span data-for="gap"><span class="flabel">차이 단위</span><span class="seg" id="unit"></span></span>
+        <span data-for="metric"><span class="flabel">지표</span><select id="metric"></select></span>
+      </div>
+      <div class="panels" id="panels"></div>
+      <div class="tablewrap"><table id="table"></table></div>
+      <p class="foot" id="foot"></p>
+    </section>
+  </div>
+</main>
+<div class="tip" id="tip" role="tooltip"></div>
+
+<script>
+const DATA = __DATA__;
+const $ = id => document.getElementById(id);
+const MONTH = 30.4375 * 864e5;
+const state = {
+  tab: 'price', years: 5, win: 6, dots: true, unit: 'won', metric: Object.keys(DATA.metrics)[0],
+  on: new Set(DATA.complexes.map(c => c.id)),
+};
+try { const s = JSON.parse(localStorage.getItem('fmh-state') || 'null');
+  if (s) { Object.assign(state, s, {on: new Set(s.on.filter(id => DATA.complexes.some(c => c.id === id)))}); } } catch (e) {}
+function save() { try { localStorage.setItem('fmh-state', JSON.stringify({...state, on: [...state.on]})); } catch (e) {} }
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const home = DATA.complexes.find(c => c.home);
+const byId = Object.fromEntries(DATA.complexes.map(c => [c.id, c]));
+const regions = [...new Set(DATA.complexes.filter(c => !c.home).map(c => c.region))];
+const colorOf = c => c.home ? css('--home') : css('--s' + c.slot);
+
+function fmtWon(v, signed) {
+  if (v == null || isNaN(v)) return '-';
+  const s = signed ? (v > 0 ? '+' : v < 0 ? '−' : '±') : (v < 0 ? '−' : '');
+  const a = Math.round(Math.abs(v)); const eok = Math.floor(a / 10000), man = a % 10000;
+  return s + (eok ? eok + '억' + (man ? ' ' + man.toLocaleString() : '') : man.toLocaleString() + '만');
+}
+const fmtAxis = v => (v / 10000).toFixed(Math.abs(v) < 100000 && v % 10000 ? 1 : 0) + '억';
+const fmtMonth = t => { const d = new Date(t); return String(d.getFullYear()).slice(2) + '.' + String(d.getMonth() + 1).padStart(2, '0'); };
+// x축 눈금: 3년 이상은 매년 1월, 1년은 분기
+function xTicks(a, b) {
+  const out = []; const d = new Date(a); const every = state.years >= 3 ? 12 : 3;
+  for (let y = d.getUTCFullYear(), m = 0; ; m += every) {
+    const t = Date.UTC(y, m, 1); if (t > b) break; if (t >= a) out.push(t);
+  }
+  return out;
+}
+const xLabel = t => { const d = new Date(t); return d.getUTCMonth() === 0 ? String(d.getUTCFullYear()) : (d.getUTCMonth() + 1) + '월'; };
+const fmtDate = t => new Date(t).toISOString().slice(0, 10);
+
+// ---------- 추세선: 월별 그리드에서 최근 N개월 거래의 중위값 ----------
+const lastT = Date.parse(DATA.updated);
+function monthGrid(years) {
+  const end = new Date(lastT); const out = [];
+  for (let k = years * 12; k >= 0; k--) out.push(Date.UTC(end.getUTCFullYear(), end.getUTCMonth() - k, 15));
+  return out;
+}
+function median(a) { const s = [...a].sort((x, y) => x - y); const m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; }
+const trendCache = {};
+function trend(id) {
+  const key = id + ':' + state.win + ':' + state.years;
+  if (trendCache[key]) return trendCache[key];
+  const trades = DATA.trades[id] || []; const grid = monthGrid(state.years);
+  const out = grid.map(t => {
+    const lo = t - state.win * MONTH;
+    const vals = trades.filter(r => r[0] > lo && r[0] <= t + MONTH / 2).map(r => r[1]);
+    return {x: t, y: vals.length ? median(vals) : null, n: vals.length};
+  });
+  return (trendCache[key] = out);
+}
+function gapSeries(id) {
+  const h = trend(home.id), t = trend(id);
+  return t.map((p, i) => {
+    const hv = h[i].y;
+    if (p.y == null || hv == null) return {x: p.x, y: null};
+    return {x: p.x, y: state.unit === 'won' ? p.y - hv : (p.y / hv - 1) * 100};
+  });
+}
+function metricSeries(id) {
+  const src = DATA.metrics[state.metric]; const s = (src && src.series[id]) || {};
+  const start = lastT - state.years * 12 * MONTH;
+  return Object.entries(s).map(([d, v]) => ({x: Date.parse(d), y: v})).filter(p => p.x >= start).sort((a, b) => a.x - b.x);
+}
+
+// ---------- 단지 선택 (지역별 일괄 체크) ----------
+function buildPicker() {
+  const root = $('picker'); root.textContent = '';
+  const mk = (c, cls) => {
+    const l = document.createElement('label'); l.className = 'item' + (cls ? ' ' + cls : '');
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = state.on.has(c.id);
+    cb.addEventListener('change', () => { cb.checked ? state.on.add(c.id) : state.on.delete(c.id); syncRegions(); render(); });
+    const k = document.createElement('span'); k.className = 'key' + (c.home ? ' home' : ''); k.style.background = colorOf(c);
+    const t = document.createElement('span'); t.textContent = c.name;
+    l.append(cb, k, t); return l;
+  };
+  const hg = document.createElement('div'); hg.className = 'group'; hg.append(mk(home)); root.append(hg);
+  for (const r of regions) {
+    const g = document.createElement('div'); g.className = 'group';
+    const members = DATA.complexes.filter(c => !c.home && c.region === r);
+    const l = document.createElement('label'); l.className = 'item region';
+    const cb = document.createElement('input'); cb.type = 'checkbox'; cb.dataset.region = r;
+    cb.addEventListener('change', () => { members.forEach(c => cb.checked ? state.on.add(c.id) : state.on.delete(c.id)); buildPicker(); render(); });
+    const t = document.createElement('span'); t.textContent = r;
+    const n = document.createElement('span'); n.className = 'cnt'; n.textContent = members.length + '개';
+    l.append(cb, t, n);
+    const items = document.createElement('div'); items.className = 'items';
+    members.forEach(c => items.append(mk(c)));
+    g.append(l, items); root.append(g);
+  }
+  syncRegions();
+}
+function syncRegions() {
+  document.querySelectorAll('input[data-region]').forEach(cb => {
+    const m = DATA.complexes.filter(c => !c.home && c.region === cb.dataset.region);
+    const k = m.filter(c => state.on.has(c.id)).length;
+    cb.checked = k === m.length; cb.indeterminate = k > 0 && k < m.length;
+  });
+}
+
+// ---------- 필터 ----------
+function seg(el, opts, key) {
+  el.textContent = '';
+  for (const [v, label] of opts) {
+    const b = document.createElement('button'); b.textContent = label; b.setAttribute('aria-pressed', String(state[key] === v));
+    b.addEventListener('click', () => { state[key] = v; seg(el, opts, key); render(); }); el.append(b);
+  }
+}
+for (const [k, m] of Object.entries(DATA.metrics)) { const o = document.createElement('option'); o.value = k; o.textContent = m.label; $('metric').append(o); }
+
+// ---------- 차트 (지역별 small multiples, 공통 y축) ----------
+const charts = [];
+const crosshair = {
+  id: 'crosshair',
+  afterDraw(ch) { const x = ch.$hoverX; if (x == null) return; const {top, bottom} = ch.chartArea; const c = ch.ctx;
+    c.save(); c.strokeStyle = css('--axis'); c.lineWidth = 1; c.beginPath(); c.moveTo(x, top); c.lineTo(x, bottom); c.stroke(); c.restore(); },
+};
+const zeroLine = {
+  id: 'zeroLine',
+  beforeDatasetsDraw(ch) { if (!ch.$zero) return; const y = ch.scales.y.getPixelForValue(0); const {left, right} = ch.chartArea;
+    const c = ch.ctx; c.save(); c.strokeStyle = css('--muted'); c.lineWidth = 1; c.beginPath(); c.moveTo(left, y); c.lineTo(right, y); c.stroke(); c.restore(); },
+};
+
+function panelSeries(regionMembers) {
+  // 반환: [{c, line:[{x,y}], dots:[[t,price,floor]]}]
+  const list = [];
+  const showHome = state.on.has(home.id) && state.tab === 'price';
+  const cs = (showHome ? [home] : []).concat(regionMembers.filter(c => state.on.has(c.id)));
+  for (const c of cs) {
+    let line, dots = [];
+    if (state.tab === 'price') {
+      line = trend(c.id);
+      const start = lastT - state.years * 12 * MONTH;
+      if (state.dots) dots = (DATA.trades[c.id] || []).filter(r => r[0] >= start);
+    } else if (state.tab === 'gap') line = gapSeries(c.id);
+    else line = metricSeries(c.id);
+    list.push({c, line, dots});
+  }
+  return list;
+}
+
+function render() {
+  save();
+  document.querySelectorAll('.tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === state.tab)));
+  document.querySelectorAll('[data-for]').forEach(el => el.hidden = !el.dataset.for.split(' ').includes(state.tab));
+  $('win').value = String(state.win); $('dots').checked = state.dots; $('metric').value = state.metric;
+  charts.splice(0).forEach(c => c.destroy());
+  const root = $('panels'); root.textContent = '';
+  const panels = regions.map(r => ({r, members: DATA.complexes.filter(c => !c.home && c.region === r)}))
+    .filter(p => p.members.some(c => state.on.has(c.id)));
+  if (!panels.length) { const e = document.createElement('p'); e.className = 'empty'; e.textContent = '왼쪽에서 비교할 단지를 선택하세요.'; root.append(e); }
+
+  const built = panels.map(p => ({...p, series: panelSeries(p.members)}));
+  // 공통 y축 범위
+  let lo = Infinity, hi = -Infinity;
+  for (const p of built) for (const s of p.series) {
+    for (const pt of s.line) if (pt.y != null) { lo = Math.min(lo, pt.y); hi = Math.max(hi, pt.y); }
+    for (const d of s.dots) { lo = Math.min(lo, d[1]); hi = Math.max(hi, d[1]); }
+  }
+  if (state.tab === 'gap') { lo = Math.min(lo, 0); hi = Math.max(hi, 0); }
+  if (!isFinite(lo)) { lo = 0; hi = 1; }
+  // 깔끔한 눈금: 범위에 맞는 1·2·5 단위 간격으로 바깥쪽 반올림
+  const raw = (hi - lo) / 5 || 1, mag = Math.pow(10, Math.floor(Math.log10(raw)));
+  const step = [1, 2, 2.5, 5, 10].map(m => m * mag).find(v => v >= raw);
+  lo = Math.floor(lo / step) * step; hi = Math.ceil(hi / step) * step;
+  if (hi === lo) hi = lo + step;
+  const xmin = lastT - state.years * 12 * MONTH, xmax = lastT + MONTH / 2;
+
+  for (const p of built) {
+    const card = document.createElement('div'); card.className = 'card';
+    const h = document.createElement('h3'); h.textContent = p.r;
+    const note = document.createElement('p'); note.className = 'note';
+    note.textContent = state.tab === 'price' ? `점: 개별 실거래 · 선: ${state.win}개월 이동 중위값 · 굵은 선: 우리집`
+      : state.tab === 'gap' ? `비교단지 추세선 − 우리집 추세선 (${state.unit === 'won' ? '금액' : '%'}) · 0보다 위면 우리집보다 비쌈`
+      : DATA.metrics[state.metric].label;
+    const lg = document.createElement('div'); lg.className = 'legend';
+    for (const s of p.series) { const sp = document.createElement('span'); const k = document.createElement('span');
+      k.className = 'key' + (s.c.home ? ' home' : ''); k.style.background = colorOf(s.c); const t = document.createElement('span');
+      t.textContent = s.c.name; sp.append(k, t); lg.append(sp); }
+    const box = document.createElement('div'); box.className = 'plot'; const cv = document.createElement('canvas');
+    cv.setAttribute('role', 'img'); cv.setAttribute('aria-label', p.r + ' 차트 — 아래 표에서 같은 값을 볼 수 있습니다');
+    box.append(cv); card.append(h, note, lg, box); root.append(card);
+
+    const datasets = [];
+    for (const s of p.series) {
+      const col = colorOf(s.c);
+      if (s.dots.length) datasets.push({type: 'scatter', data: s.dots.map(d => ({x: d[0], y: d[1], f: d[2]})), c: s.c, dots: true,
+        pointRadius: 2.5, pointHoverRadius: 4, pointBackgroundColor: col + '55', pointBorderWidth: 0, order: 2});
+      datasets.push({type: 'line', data: s.line, c: s.c, borderColor: col, borderWidth: s.c.home ? 3 : 2, pointRadius: 0,
+        tension: 0.25, spanGaps: true, order: s.c.home ? 0 : 1, borderCapStyle: 'round', borderJoinStyle: 'round'});
+    }
+    const ch = new Chart(cv, {
+      data: {datasets},
+      options: {
+        animation: false, responsive: true, maintainAspectRatio: false, parsing: false, normalized: true,
+        events: ['mousemove', 'mouseout', 'touchstart', 'touchmove'],
+        plugins: {legend: {display: false}, tooltip: {enabled: false}},
+        scales: {
+          x: {type: 'linear', min: xmin, max: xmax, grid: {color: css('--grid')}, border: {color: css('--axis')},
+            afterBuildTicks: ax => { ax.ticks = xTicks(xmin, xmax).map(value => ({value})); },
+            ticks: {color: css('--muted'), autoSkip: false, maxRotation: 0, callback: v => xLabel(v)}},
+          y: {min: lo, max: hi, grid: {color: css('--grid')}, border: {display: false},
+            ticks: {color: css('--muted'), stepSize: step,
+              callback: v => state.tab === 'gap' && state.unit === 'pct' ? v.toFixed(0) + '%' : fmtAxis(v)}},
+        },
+        onHover: (e, _, chart) => hover(e, chart),
+      },
+      plugins: [crosshair, zeroLine],
+    });
+    ch.$zero = state.tab !== 'price';
+    cv.addEventListener('mouseleave', () => { ch.$hoverX = null; ch.draw(); $('tip').style.display = 'none'; });
+    charts.push(ch);
+  }
+  renderTable(built);
+}
+
+function hover(e, chart) {
+  const tip = $('tip'); const {left, right, top, bottom} = chart.chartArea;
+  if (e.x < left || e.x > right || e.y < top || e.y > bottom) { chart.$hoverX = null; chart.draw(); tip.style.display = 'none'; return; }
+  const xv = chart.scales.x.getValueForPixel(e.x);
+  const lines = chart.data.datasets.filter(d => d.type === 'line');
+  let best = null; // 가장 가까운 x 지점 (모든 선 공통)
+  for (const d of lines) for (const p of d.data) if (p.y != null && (!best || Math.abs(p.x - xv) < Math.abs(best - xv))) best = p.x;
+  if (best == null) return;
+  chart.$hoverX = chart.scales.x.getPixelForValue(best); chart.draw();
+  tip.textContent = '';
+  const title = document.createElement('div'); title.className = 't';
+  title.textContent = state.tab === 'metric' ? fmtDate(best) : fmtMonth(best).replace('.', '년 ') + '월';
+  tip.append(title);
+  const rows = lines.map(d => ({d, p: d.data.find(p => p.x === best)})).filter(r => r.p && r.p.y != null).sort((a, b) => b.p.y - a.p.y);
+  for (const {d, p} of rows) {
+    const r = document.createElement('div'); r.className = 'r';
+    const k = document.createElement('span'); k.className = 'key'; k.style.background = colorOf(d.c);
+    const v = document.createElement('span'); v.className = 'v';
+    v.textContent = state.tab === 'gap' && state.unit === 'pct' ? (p.y > 0 ? '+' : '') + p.y.toFixed(1) + '%' : fmtWon(p.y, state.tab === 'gap');
+    const n = document.createElement('span'); n.className = 'n'; n.textContent = d.c.name + (p.n != null ? ` (${p.n}건)` : '');
+    r.append(k, v, n); tip.append(r);
+  }
+  // 포인터 근처(12px 이내) 개별 거래
+  let near = null, nd = 144;
+  for (const d of chart.data.datasets.filter(d => d.dots)) for (const p of d.data) {
+    const dx = chart.scales.x.getPixelForValue(p.x) - e.x, dy = chart.scales.y.getPixelForValue(p.y) - e.y;
+    if (dx * dx + dy * dy < nd) { nd = dx * dx + dy * dy; near = {d, p}; }
+  }
+  if (near) { const t = document.createElement('div'); t.className = 'trade';
+    t.textContent = `거래 ${fmtDate(near.p.x)} · ${near.d.c.name} · ${fmtWon(near.p.y)} · ${near.p.f}층`; tip.append(t); }
+  tip.style.display = 'block';
+  const rect = chart.canvas.getBoundingClientRect(); const tw = tip.offsetWidth;
+  let x = rect.left + e.x + 14; if (x + tw > window.innerWidth - 8) x = rect.left + e.x - tw - 14;
+  tip.style.left = Math.max(8, x) + 'px'; tip.style.top = Math.max(8, rect.top + e.y - 20) + 'px';
+}
+
+// ---------- 표 (차트와 같은 값) ----------
+function renderTable(built) {
+  const tb = $('table'); tb.textContent = '';
+  const head = document.createElement('tr');
+  const cols = state.tab === 'metric' ? ['단지', '최근 값', '1년 전', '변화']
+    : ['단지', '최근 추세가', '1년 전', '1년 변화', '우리집 대비', '1년 전 대비', '기간 거래'];
+  cols.forEach(c => { const th = document.createElement('th'); th.textContent = c; head.append(th); }); tb.append(head);
+  const rows = [];
+  if (state.on.has(home.id) && state.tab !== 'metric') rows.push(home);
+  for (const p of built) for (const s of p.series) if (!s.c.home) rows.push(s.c);
+  const last = arr => { for (let i = arr.length - 1; i >= 0; i--) if (arr[i].y != null) return arr[i]; return null; };
+  const at = (arr, t) => { let b = null; for (const p of arr) if (p.y != null && p.x <= t) b = p; return b; };
+  const yearAgo = lastT - 12 * MONTH;
+  const hT = trend(home.id);
+  for (const c of rows) {
+    const tr = document.createElement('tr'); const cells = [];
+    if (state.tab === 'metric') {
+      const s = metricSeries(c.id); const a = last(s), b = at(s, yearAgo);
+      cells.push(fmtWon(a && a.y), fmtWon(b && b.y), a && b ? fmtWon(a.y - b.y, true) : '-');
+    } else {
+      const t = trend(c.id); const a = last(t), b = at(t, yearAgo);
+      const ha = last(hT), hb = at(hT, yearAgo);
+      const start = lastT - state.years * 12 * MONTH;
+      const n = (DATA.trades[c.id] || []).filter(r => r[0] >= start).length;
+      cells.push(fmtWon(a && a.y), fmtWon(b && b.y), a && b ? fmtWon(a.y - b.y, true) : '-',
+        c.home ? '기준' : a && ha ? fmtWon(a.y - ha.y, true) : '-',
+        c.home ? '-' : b && hb ? fmtWon(b.y - hb.y, true) : '-', n + '건');
+    }
+    const td0 = document.createElement('td'); const k = document.createElement('span'); k.className = 'key' + (c.home ? ' home' : '');
+    k.style.background = colorOf(c); const nm = document.createElement('span'); nm.textContent = c.name; td0.append(k, nm); tr.append(td0);
+    for (const v of cells) { const td = document.createElement('td'); td.textContent = v; tr.append(td); }
+    tb.append(tr);
+  }
+  $('foot').textContent = state.tab === 'metric' ? '지표 이력은 수집이 시작된 날부터 쌓입니다(호가는 매일, 실거래 기반 지표는 과거 재계산 포함).'
+    : `추세가 = 각 월 기준 최근 ${state.win}개월 실거래의 중위값. 거래가 없는 구간은 선을 이어 그립니다. 면적 범위는 config.yaml 기준.`;
+}
+
+// ---------- 초기화 ----------
+$('homeName').textContent = home.name; $('updated').textContent = DATA.updated;
+seg($('range'), [[1, '1년'], [3, '3년'], [5, '5년']], 'years');
+seg($('unit'), [['won', '금액'], ['pct', '비율']], 'unit');
+document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => { state.tab = b.dataset.tab; render(); }));
+$('win').addEventListener('change', e => { state.win = +e.target.value; render(); });
+$('dots').addEventListener('change', e => { state.dots = e.target.checked; render(); });
+$('metric').addEventListener('change', e => { state.metric = e.target.value; render(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { buildPicker(); render(); });
+buildPicker(); render();
+</script>
+</body>
+</html>
