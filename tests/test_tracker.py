@@ -81,7 +81,7 @@ def _load(conn, cfg, seen="2026-10-04"):
             if cx.matches_molit(r):
                 db.upsert_rent(conn, cx.id, r, seen)
     data = json.loads((FX / "naver.json").read_text())
-    articles = [naver.parse_article(a) for a in data["result"]["list"]]
+    articles = [naver.parse_land_article(a) for a in data["articleList"]]
     db.replace_listings(conn, seen, "home", articles)
     db.replace_listings(conn, seen, "a", [dict(x, price=x["price"] + 70000) for x in articles if x["price"]])
 
@@ -142,16 +142,48 @@ def test_unmatched_hint_suggests_similar_names():
     assert "래미안하이리버(금호동2가)" in msg and "옥수리버젠" not in msg
 
 
+def test_parse_land_article():
+    data = json.loads((FX / "naver.json").read_text())
+    a = [naver.parse_land_article(x) for x in data["articleList"]]
+    assert a[0]["price"] == 160000 and a[0]["area"] == 84 and a[0]["building"] == "101동"
+    assert a[2]["price"] == 175000
+    assert a[4]["trade_type"] == "B2" and a[4]["price"] == 30000 and a[4]["rent_price"] == 150
+
+
+class FakeBrowser:
+    def __init__(self, *a, fail=False, **kw):
+        self.calls, self.fail, self.closed = [], fail, False
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.closed = True
+
+    def fetch_articles(self, no):
+        self.calls.append(no)
+        if self.fail:
+            raise naver.NaverError(f"{no} blocked")
+        data = json.loads((FX / "naver.json").read_text())
+        return [naver.parse_land_article(x) for x in data["articleList"]]
+
+
+def test_collect_naver_saves_listings(tmp_path, monkeypatch):
+    from tracker import cli
+    cfg = make_cfg(tmp_path)
+    fake = FakeBrowser()
+    monkeypatch.setattr(naver, "NaverBrowser", lambda **kw: fake)
+    conn = db.connect(":memory:")
+    assert cli.collect_naver(conn, cfg, "2026-10-05") == []
+    assert fake.calls == ["1", "2"] and fake.closed
+    assert conn.execute("SELECT COUNT(*) FROM listings").fetchone()[0] == 12
+
+
 def test_naver_stops_after_consecutive_failures(tmp_path, monkeypatch):
     from tracker import cli
     cfg = make_cfg(tmp_path)
     cfg.targets += [Complex(id=f"t{i}", name=f"t{i}", lawd_cd="11710", naver_complex_no=str(i)) for i in range(5)]
-    calls = []
-
-    def boom(no, **kw):
-        calls.append(no)
-        raise naver.NaverError(f"{no} timeout")
-
-    monkeypatch.setattr(naver, "fetch_articles", boom)
+    fake = FakeBrowser(fail=True)
+    monkeypatch.setattr(naver, "NaverBrowser", lambda **kw: fake)
     errors = cli.collect_naver(db.connect(":memory:"), cfg, "2026-10-05")
-    assert len(calls) == 3 and "중단" in errors[-1]
+    assert len(fake.calls) == 3 and "중단" in errors[-1] and fake.closed

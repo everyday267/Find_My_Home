@@ -1,10 +1,12 @@
 """네이버 부동산 단지 매물(호가) 수집.
 
 공식 API가 아니므로 응답 구조나 접근 정책이 바뀌면 동작하지 않을 수 있습니다.
+네이버는 해외 IP와 브라우저가 아닌 클라이언트를 차단하므로, 국내 PC에서 헤드리스 브라우저(Playwright)로 수집합니다.
 요청 간 지연(naver_delay_sec)을 두고 하루 1회 정도로만 사용하세요.
 """
 from __future__ import annotations
 
+import json
 import re
 import time
 
@@ -42,48 +44,115 @@ def _num(v) -> float | None:
         return None
 
 
-def parse_article(a: dict) -> dict:
-    price = a.get("prc")
-    price = int(price) if isinstance(price, (int, float)) and price > 0 else parse_han_price(a.get("hanPrc"))
-    rent = a.get("rentPrc")
-    rent = int(rent) if isinstance(rent, (int, float)) else parse_han_price(rent)
+LAND_BASE = "https://new.land.naver.com"
+LAND_ARTICLE_PATH = (
+    "/api/articles/complex/{no}?realEstateType=APT&tradeType={trade}&tag=%3A%3A%3A%3A%3A%3A%3A%3A"
+    "&rentPriceMin=0&rentPriceMax=900000000&priceMin=0&priceMax=900000000&areaMin=0&areaMax=900000000"
+    "&oldBuildYears&recentlyBuildYears&minHouseHoldCount&maxHouseHoldCount&showArticle=false"
+    "&sameAddressGroup=false&minMaintenanceCost&maxMaintenanceCost&priceType=RETAIL&directions="
+    "&page={page}&complexNo={no}&buildingNos=&areaNos=&type=list&order=prc"
+)
+
+
+def parse_land_article(a: dict) -> dict:
+    """new.land.naver.com /api/articles/complex 응답의 매물 1건 → 저장 형식."""
     return {
-        "article_no": str(a.get("atclNo")),
-        "trade_type": a.get("tradTpCd"),
-        "price": price,
-        "rent_price": rent or 0,
-        "area_supply": _num(a.get("spc1")),
-        "area": _num(a.get("spc2")),
-        "floor_info": a.get("flrInfo"),
-        "building": a.get("bildNm"),
+        "article_no": str(a.get("articleNo")),
+        "trade_type": a.get("tradeTypeCode"),
+        "price": parse_han_price(a.get("dealOrWarrantPrc")),
+        "rent_price": parse_han_price(a.get("rentPrc")) or 0,
+        "area_supply": _num(a.get("area1")),
+        "area": _num(a.get("area2")),
+        "floor_info": a.get("floorInfo"),
+        "building": a.get("buildingName"),
         "direction": a.get("direction"),
-        "confirm_date": a.get("atclCfmYmd"),
-        "description": a.get("atclFetrDesc"),
+        "confirm_date": a.get("articleConfirmYmd"),
+        "description": a.get("articleFeatureDesc"),
     }
 
 
-def fetch_articles(complex_no: str, trade_types: str = "A1:B1:B2", max_pages: int = 30,
-                   delay: float = 1.5, session: requests.Session | None = None) -> list[dict]:
-    session = session or requests.Session()
-    out: list[dict] = []
-    for page in range(1, max_pages + 1):
-        params = {"hscpNo": complex_no, "tradTpCd": trade_types, "order": "prc", "showR0": "N", "page": page}
+_FETCH_JS = """async ([url, auth]) => {
+  const headers = {accept: 'application/json'};
+  if (auth) headers['authorization'] = auth;
+  const r = await fetch(url, {headers, credentials: 'include'});
+  return {status: r.status, text: await r.text()};
+}"""
+
+
+class NaverBrowser:
+    """헤드리스 브라우저로 네이버 부동산을 열고, 페이지 안에서 매물 API를 호출.
+
+    네이버는 브라우저가 아닌 클라이언트의 API 요청을 차단하므로 실제 브라우저 세션을 사용한다.
+    """
+
+    def __init__(self, delay: float = 1.5, max_pages: int = 30, headless: bool = True):
+        self.delay, self.max_pages, self.headless = delay, max_pages, headless
+        self._pw = self._browser = self.page = None
+        self.auth: str | None = None
+
+    def __enter__(self) -> "NaverBrowser":
         try:
-            resp = session.get(ARTICLE_URL, params=params, headers=HEADERS, timeout=20)
-            resp.raise_for_status()
-            data = resp.json()
-        except (requests.RequestException, ValueError) as e:
-            raise NaverError(f"단지 {complex_no} 매물 조회 실패(page {page}): {e}") from e
-        if not isinstance(data, dict):
-            raise NaverError(f"단지 {complex_no} 예상치 못한 응답(page {page}): HTTP {resp.status_code} "
-                             f"{resp.headers.get('content-type')} {resp.text[:200]!r}")
-        result = data.get("result") or {}
-        articles = result.get("list") or []
-        out.extend(parse_article(a) for a in articles if a.get("atclNo"))
-        if result.get("moreDataYn") != "Y" or not articles:
-            break
-        time.sleep(delay)
-    return out
+            from playwright.sync_api import sync_playwright
+        except ImportError as e:
+            raise NaverError("playwright가 설치되지 않음 (pip install -r requirements-naver.txt)") from e
+        self._pw = sync_playwright().start()
+        self._browser = self._pw.chromium.launch(headless=self.headless)
+        ctx = self._browser.new_context(locale="ko-KR", user_agent=PROBE_PAGE_HEADERS["User-Agent"],
+                                        viewport={"width": 1400, "height": 900})
+        self.page = ctx.new_page()
+        self.page.on("request", self._capture_auth)
+        return self
+
+    def __exit__(self, *exc) -> None:
+        if self._browser:
+            self._browser.close()
+        if self._pw:
+            self._pw.stop()
+
+    def _capture_auth(self, request) -> None:
+        auth = request.headers.get("authorization")
+        if auth and "/api/" in request.url:
+            self.auth = auth
+
+    def open_complex(self, complex_no: str) -> None:
+        """단지 페이지를 열어 쿠키와 인증 토큰을 확보."""
+        try:
+            self.page.goto(f"{LAND_BASE}/complexes/{complex_no}?a=APT&e=RETAIL",
+                           wait_until="domcontentloaded", timeout=45000)
+        except Exception as e:  # noqa: BLE001
+            raise NaverError(f"단지 {complex_no} 페이지 열기 실패: {e}") from e
+        for _ in range(30):
+            if self.auth:
+                break
+            self.page.wait_for_timeout(500)
+
+    def fetch_articles(self, complex_no: str, trade_types: str = "A1:B1:B2") -> list[dict]:
+        if not self.auth:
+            self.open_complex(complex_no)
+        out: list[dict] = []
+        for page_no in range(1, self.max_pages + 1):
+            path = LAND_ARTICLE_PATH.format(no=complex_no, trade=trade_types.replace(":", "%3A"), page=page_no)
+            try:
+                res = self.page.evaluate(_FETCH_JS, [LAND_BASE + path, self.auth])
+            except Exception as e:  # noqa: BLE001
+                raise NaverError(f"단지 {complex_no} 매물 조회 실패(page {page_no}): {e}") from e
+            if res["status"] == 401 and page_no == 1:
+                self.auth = None  # 토큰 만료 → 페이지를 다시 열어 갱신 후 재시도
+                self.open_complex(complex_no)
+                res = self.page.evaluate(_FETCH_JS, [LAND_BASE + path, self.auth])
+            if res["status"] != 200:
+                raise NaverError(f"단지 {complex_no} 매물 조회 실패(page {page_no}): HTTP {res['status']} "
+                                 f"{res['text'][:200]!r}")
+            try:
+                data = json.loads(res["text"])
+            except ValueError as e:
+                raise NaverError(f"단지 {complex_no} 응답 파싱 실패: {res['text'][:200]!r}") from e
+            articles = data.get("articleList") or []
+            out.extend(parse_land_article(a) for a in articles if a.get("articleNo"))
+            if not data.get("isMoreData") or not articles:
+                break
+            time.sleep(self.delay)
+        return out
 
 
 PROBE_PAGE_HEADERS = {

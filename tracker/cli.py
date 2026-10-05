@@ -82,27 +82,34 @@ def unmatched_hint(cx: Complex, names: set[tuple[str, str]]) -> str:
 
 
 def collect_naver(conn, cfg: Config, snapshot_date: str) -> list[str]:
-    session = requests.Session()
     errors: list[str] = []
+    targets = [cx for cx in cfg.complexes if cx.naver_complex_no]
+    if not targets:
+        return errors
+    try:
+        browser = naver.NaverBrowser(delay=cfg.settings.naver_delay_sec, max_pages=cfg.settings.naver_max_pages)
+        browser.__enter__()
+    except Exception as e:  # noqa: BLE001
+        return [f"네이버 수집용 브라우저 실행 실패: {e}"]
     consecutive_failures = 0
-    for cx in cfg.complexes:
-        if not cx.naver_complex_no:
-            continue
-        try:
-            articles = naver.fetch_articles(cx.naver_complex_no, max_pages=cfg.settings.naver_max_pages,
-                                            delay=cfg.settings.naver_delay_sec, session=session)
-        except naver.NaverError as e:
-            errors.append(str(e))
-            consecutive_failures += 1
-            # 연속 실패면 접속 자체가 막힌 것(해외 IP 등)으로 보고 나머지는 건너뜀
-            if consecutive_failures >= 3:
-                errors.append("네이버 부동산 연속 접속 실패 — 남은 단지 호가 수집 중단 (해외 IP 차단 가능성)")
-                break
-            continue
-        consecutive_failures = 0
-        db.replace_listings(conn, snapshot_date, cx.id, articles)
-        conn.commit()
-        log.info("%s: 매물 %d건", cx.name, len(articles))
+    try:
+        for cx in targets:
+            try:
+                articles = browser.fetch_articles(cx.naver_complex_no)
+            except naver.NaverError as e:
+                errors.append(str(e))
+                consecutive_failures += 1
+                # 연속 실패면 접속 자체가 막힌 것으로 보고 나머지는 건너뜀
+                if consecutive_failures >= 3:
+                    errors.append("네이버 부동산 연속 접속 실패 — 남은 단지 호가 수집 중단")
+                    break
+                continue
+            consecutive_failures = 0
+            db.replace_listings(conn, snapshot_date, cx.id, articles)
+            conn.commit()
+            log.info("%s: 매물 %d건", cx.name, len(articles))
+    finally:
+        browser.__exit__(None, None, None)
     return errors
 
 

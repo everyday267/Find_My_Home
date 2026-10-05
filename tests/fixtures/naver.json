@@ -1,8 +1,8 @@
-{"result": {"moreDataYn": "N", "totAtclCnt": 4, "list": [
- {"atclNo": "1", "tradTpCd": "A1", "prc": 160000, "hanPrc": "16억", "spc1": "112", "spc2": "84.97", "flrInfo": "10/25", "bildNm": "101동", "direction": "남향", "atclCfmYmd": "26.10.01."},
- {"atclNo": "2", "tradTpCd": "A1", "prc": 160000, "hanPrc": "16억", "spc1": "112", "spc2": "84.97", "flrInfo": "10/25", "bildNm": "101동"},
- {"atclNo": "3", "tradTpCd": "A1", "hanPrc": "17억 5,000", "spc1": "112", "spc2": "84.97", "flrInfo": "고/25", "bildNm": "102동"},
- {"atclNo": "4", "tradTpCd": "B1", "prc": 85000, "spc1": "112", "spc2": "84.97", "flrInfo": "5/25", "bildNm": "103동"},
- {"atclNo": "5", "tradTpCd": "B2", "prc": 30000, "rentPrc": 150, "spc1": "112", "spc2": "84.97", "flrInfo": "3/25", "bildNm": "103동"},
- {"atclNo": "6", "tradTpCd": "A1", "prc": 110000, "spc1": "80", "spc2": "59.9", "flrInfo": "3/25", "bildNm": "105동"}
-]}}
+{"isMoreData": false, "articleList": [
+ {"articleNo": "1", "tradeTypeCode": "A1", "dealOrWarrantPrc": "16억", "area1": 112, "area2": 84, "floorInfo": "10/25", "buildingName": "101동", "direction": "남향", "articleConfirmYmd": "20261001"},
+ {"articleNo": "2", "tradeTypeCode": "A1", "dealOrWarrantPrc": "16억", "area1": 112, "area2": 84, "floorInfo": "10/25", "buildingName": "101동"},
+ {"articleNo": "3", "tradeTypeCode": "A1", "dealOrWarrantPrc": "17억 5,000", "area1": 112, "area2": 84, "floorInfo": "고/25", "buildingName": "102동"},
+ {"articleNo": "4", "tradeTypeCode": "B1", "dealOrWarrantPrc": "8억 5,000", "area1": 112, "area2": 84, "floorInfo": "5/25", "buildingName": "103동"},
+ {"articleNo": "5", "tradeTypeCode": "B2", "dealOrWarrantPrc": "3억", "rentPrc": "150", "area1": 112, "area2": 84, "floorInfo": "3/25", "buildingName": "103동"},
+ {"articleNo": "6", "tradeTypeCode": "A1", "dealOrWarrantPrc": "11억", "area1": 80, "area2": 59, "floorInfo": "3/25", "buildingName": "105동"}
+]}
