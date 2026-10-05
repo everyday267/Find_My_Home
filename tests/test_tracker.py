@@ -133,3 +133,10 @@ def test_gap_signal():
     assert sig["percentile"] == pytest.approx(1 / 30)
     assert sig["d7"] == -7000 and sig["signal"].startswith("🟢")
     assert analysis.gap_signal(series, "2030-01-01") == {}
+
+
+def test_unmatched_hint_suggests_similar_names():
+    from tracker.cli import unmatched_hint
+    cx = Complex(id="x", name="래미안금호하이리버", lawd_cd="11200", apt_names=["래미안금호하이리버"], umd_nm="금호동2가")
+    msg = unmatched_hint(cx, {("래미안하이리버", "금호동2가"), ("래미안옥수리버젠", "옥수동"), ("금호자이1차", "금호동2가")})
+    assert "래미안하이리버(금호동2가)" in msg and "옥수리버젠" not in msg

@@ -13,16 +13,180 @@ home:
   area_min: 59                # 24평형 = 전용 59㎡ 타입(59A/59B 등)
   area_max: 60.99
 
-# 갈아탈 후보 단지 — 아래 형식으로 추가
-targets: []
-#  - id: target_a
-#    name: 후보단지 84
-#    lawd_cd: "11290"
-#    apt_name: "단지명"
-#    umd_nm: 법정동
-#    naver_complex_no: "12345"
-#    area_min: 84
-#    area_max: 85.99
+# 갈아탈 후보 단지 — 모두 전용 59㎡(24~25평형) 기준
+# lawd_cd: 마포구 11440 · 성동구 11200 · 송파구 11710 · 서대문구 11410
+targets:
+  - id: mapo_raemian_prugio            # 1
+    name: 마포래미안푸르지오 59
+    lawd_cd: "11440"
+    umd_nm: 아현동
+    apt_name: ["마포래미안푸르지오", "마포래미안푸르지오1단지", "마포래미안푸르지오2단지", "마포래미안푸르지오3단지", "마포래미안푸르지오4단지"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: mapo_the_classy            # 2
+    name: 마포더클래시 59
+    lawd_cd: "11440"
+    umd_nm: 아현동
+    apt_name: ["마포더클래시"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: mapo_prestige_xi_1            # 3
+    name: 마포프레스티지자이 1단지 59
+    lawd_cd: "11440"
+    umd_nm: 염리동
+    apt_name: ["마포프레스티지자이", "마포프레스티지자이1단지"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: mapo_prestige_xi_2            # 4
+    name: 마포프레스티지자이 2단지 59
+    lawd_cd: "11440"
+    umd_nm: 염리동
+    apt_name: ["마포프레스티지자이2단지"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: mapo_xi_the_centrige            # 5
+    name: 마포자이더센트리지 59
+    lawd_cd: "11440"
+    umd_nm: 염리동
+    apt_name: ["마포자이더센트리지", "마포더센트리지"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: raemian_gongdeok5            # 6
+    name: 래미안공덕5차 59
+    lawd_cd: "11440"
+    umd_nm: 공덕동
+    apt_name: ["래미안공덕5차"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: gongdeok_xi            # 7
+    name: 공덕자이 59
+    lawd_cd: "11440"
+    umd_nm: 아현동
+    apt_name: ["공덕자이"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: eps_geumho_parkhills            # 8
+    name: e편한세상 금호파크힐스 59
+    lawd_cd: "11200"
+    umd_nm: 금호동1가
+    apt_name: ["e편한세상금호파크힐스", "이편한세상금호파크힐스"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: singeumho_park_xi            # 9
+    name: 신금호파크자이 59
+    lawd_cd: "11200"
+    umd_nm: 금호동2가
+    apt_name: ["신금호파크자이"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: geumho_central_xi            # 10
+    name: 금호센트럴자이 59
+    lawd_cd: "11200"
+    umd_nm: 금호동2가
+    apt_name: ["금호센트럴자이"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: raemian_geumho_hiriver            # 11
+    name: 래미안금호하이리버 59
+    lawd_cd: "11200"
+    umd_nm: 금호동2가
+    apt_name: ["래미안하이리버", "래미안금호하이리버"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: seoulforest_prugio1            # 12
+    name: 서울숲푸르지오 1차 59
+    lawd_cd: "11200"
+    umd_nm: 금호동4가
+    apt_name: ["서울숲푸르지오", "서울숲푸르지오1차", "서울숲1차푸르지오"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: seoulforest_prugio2            # 13
+    name: 서울숲푸르지오 2차 59
+    lawd_cd: "11200"
+    umd_nm: 금호동4가
+    apt_name: ["서울숲푸르지오2차", "서울숲2차푸르지오"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: eps_oksu_parkhills            # 14
+    name: e편한세상 옥수파크힐스 59
+    lawd_cd: "11200"
+    umd_nm: 옥수동
+    apt_name: ["e편한세상옥수파크힐스", "이편한세상옥수파크힐스"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: raemian_oksu_riverzen            # 15
+    name: 래미안옥수리버젠 59
+    lawd_cd: "11200"
+    umd_nm: 옥수동
+    apt_name: ["래미안옥수리버젠"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: raemian_songpa_finetop            # 16
+    name: 래미안송파파인탑 59
+    lawd_cd: "11710"
+    umd_nm: 송파동
+    apt_name: ["래미안송파파인탑"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: garak_ssangyong1            # 17
+    name: 가락쌍용1차 59
+    lawd_cd: "11710"
+    umd_nm: 가락동
+    apt_name: ["가락쌍용1차", "가락쌍용"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: garak_kumho            # 18
+    name: 가락금호 59
+    lawd_cd: "11710"
+    umd_nm: 가락동
+    apt_name: ["가락금호", "금호"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
+  - id: eps_sinchon            # 19
+    name: e편한세상 신촌 59
+    lawd_cd: "11410"
+    umd_nm: 북아현동
+    apt_name: ["e편한세상신촌", "e편한세상신촌1단지", "e편한세상신촌2단지", "e편한세상신촌3단지", "e편한세상신촌4단지"]
+    naver_complex_no: null
+    area_min: 59
+    area_max: 60.99
+
 
 settings:
   trade_lookback_months: 3

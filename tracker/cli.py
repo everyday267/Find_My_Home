@@ -6,13 +6,14 @@ import logging
 import os
 import sys
 from collections import Counter, defaultdict
+from difflib import SequenceMatcher
 from datetime import date, datetime
 from zoneinfo import ZoneInfo
 
 import requests
 
 from tracker import analysis, db, molit, naver, report
-from tracker.config import Config, ConfigError, load_config
+from tracker.config import Complex, Config, ConfigError, load_config, normalize_name
 
 log = logging.getLogger("tracker")
 KST = ZoneInfo("Asia/Seoul")
@@ -37,6 +38,8 @@ def collect_molit(conn, cfg: Config, months: list[str], seen: str) -> tuple[int,
     session = requests.Session()
     new_t = new_r = 0
     errors: list[str] = []
+    matched: Counter = Counter()
+    seen_names: dict[str, set[tuple[str, str]]] = defaultdict(set)
     for lawd_cd, cxs in by_lawd.items():
         for ym in months:
             for kind, fetcher in (("매매", molit.fetch_trades), ("전월세", molit.fetch_rents)):
@@ -46,15 +49,36 @@ def collect_molit(conn, cfg: Config, months: list[str], seen: str) -> tuple[int,
                     errors.append(f"{kind} {lawd_cd} {ym}: {e}")
                     continue
                 for item in items:
+                    seen_names[lawd_cd].add((item["apt_name"] or "", item["umd_nm"] or ""))
                     for cx in cxs:
                         if not cx.matches_molit(item):
                             continue
+                        matched[cx.id] += 1
                         if kind == "매매":
                             new_t += db.upsert_trade(conn, cx.id, item, seen)
                         else:
                             new_r += db.upsert_rent(conn, cx.id, item, seen)
             conn.commit()
+    failed_lawd = {e.split()[1] for e in errors}
+    for cx in cfg.complexes:
+        if not matched[cx.id] and seen_names[cx.lawd_cd] and cx.lawd_cd not in failed_lawd:
+            errors.append(unmatched_hint(cx, seen_names[cx.lawd_cd]))
     return new_t, new_r, errors
+
+
+def unmatched_hint(cx: Complex, names: set[tuple[str, str]]) -> str:
+    """실거래가 한 건도 매칭되지 않은 단지에 대해 비슷한 단지명을 제안."""
+    targets = [normalize_name(n) for n in cx.apt_names]
+    scored = []
+    for name, umd in names:
+        if cx.umd_nm and umd and normalize_name(umd) != normalize_name(cx.umd_nm):
+            continue
+        score = max(SequenceMatcher(None, normalize_name(name), t).ratio() for t in targets)
+        scored.append((score, name, umd))
+    best = [f"{n}({u})" for sc, n, u in sorted(scored, reverse=True)[:5] if sc >= 0.4]
+    hint = ", ".join(best) if best else "없음"
+    return (f"[{cx.name}] 조회 기간 실거래가 0건 — apt_name {cx.apt_names} 확인 필요. "
+            f"비슷한 단지명: {hint}")
 
 
 def collect_naver(conn, cfg: Config, snapshot_date: str) -> list[str]:
