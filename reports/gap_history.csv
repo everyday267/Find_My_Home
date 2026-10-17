@@ -96159,3 +96159,57 @@
 2026-10-16,singeumho_park_xi,신금호파크자이 59,jeonse_trade_median,전세 실거래 중위가,81900.0,66075.0,15825.0,1.2395
 2026-10-16,singeumho_park_xi,신금호파크자이 59,sale_trade_last,매매 최근 실거래가,200000.0,154000.0,46000.0,1.2987
 2026-10-16,singeumho_park_xi,신금호파크자이 59,sale_trade_median,매매 실거래 중위가,202500.0,152000.0,50500.0,1.3322
+2026-10-17,eps_geumho_parkhills,e편한세상 금호파크힐스 59,jeonse_trade_median,전세 실거래 중위가,82900.0,66075.0,16825.0,1.2546
+2026-10-17,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_trade_last,매매 최근 실거래가,216000.0,154000.0,62000.0,1.4026
+2026-10-17,eps_geumho_parkhills,e편한세상 금호파크힐스 59,sale_trade_median,매매 실거래 중위가,208250.0,152000.0,56250.0,1.3701
+2026-10-17,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,jeonse_trade_median,전세 실거래 중위가,91350.0,66075.0,25275.0,1.3825
+2026-10-17,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_trade_last,매매 최근 실거래가,227000.0,154000.0,73000.0,1.474
+2026-10-17,eps_oksu_parkhills,e편한세상 옥수파크힐스 59,sale_trade_median,매매 실거래 중위가,230000.0,152000.0,78000.0,1.5132
+2026-10-17,eps_sinchon,e편한세상 신촌 59,jeonse_trade_median,전세 실거래 중위가,82000.0,66075.0,15925.0,1.241
+2026-10-17,eps_sinchon,e편한세상 신촌 59,sale_trade_last,매매 최근 실거래가,196500.0,154000.0,42500.0,1.276
+2026-10-17,eps_sinchon,e편한세상 신촌 59,sale_trade_median,매매 실거래 중위가,188000.0,152000.0,36000.0,1.2368
+2026-10-17,garak_kumho,가락금호 59,jeonse_trade_median,전세 실거래 중위가,57750.0,66075.0,-8325.0,0.874
+2026-10-17,garak_kumho,가락금호 59,sale_trade_last,매매 최근 실거래가,177000.0,154000.0,23000.0,1.1494
+2026-10-17,garak_kumho,가락금호 59,sale_trade_median,매매 실거래 중위가,181500.0,152000.0,29500.0,1.1941
+2026-10-17,garak_ssangyong1,가락쌍용1차 59,jeonse_trade_median,전세 실거래 중위가,57750.0,66075.0,-8325.0,0.874
+2026-10-17,garak_ssangyong1,가락쌍용1차 59,sale_trade_last,매매 최근 실거래가,193500.0,154000.0,39500.0,1.2565
+2026-10-17,garak_ssangyong1,가락쌍용1차 59,sale_trade_median,매매 실거래 중위가,187600.0,152000.0,35600.0,1.2342
+2026-10-17,geumho_central_xi,금호센트럴자이 59,jeonse_trade_median,전세 실거래 중위가,75000.0,66075.0,8925.0,1.1351
+2026-10-17,geumho_central_xi,금호센트럴자이 59,sale_trade_last,매매 최근 실거래가,180000.0,154000.0,26000.0,1.1688
+2026-10-17,geumho_central_xi,금호센트럴자이 59,sale_trade_median,매매 실거래 중위가,184000.0,152000.0,32000.0,1.2105
+2026-10-17,gongdeok_xi,공덕자이 59,jeonse_trade_median,전세 실거래 중위가,83000.0,66075.0,16925.0,1.2561
+2026-10-17,gongdeok_xi,공덕자이 59,sale_trade_last,매매 최근 실거래가,225000.0,154000.0,71000.0,1.461
+2026-10-17,gongdeok_xi,공덕자이 59,sale_trade_median,매매 실거래 중위가,222000.0,152000.0,70000.0,1.4605
+2026-10-17,mapo_prestige_xi_1,마포프레스티지자이 59,jeonse_trade_median,전세 실거래 중위가,90000.0,66075.0,23925.0,1.3621
+2026-10-17,mapo_prestige_xi_1,마포프레스티지자이 59,sale_trade_last,매매 최근 실거래가,227000.0,154000.0,73000.0,1.474
+2026-10-17,mapo_prestige_xi_1,마포프레스티지자이 59,sale_trade_median,매매 실거래 중위가,228500.0,152000.0,76500.0,1.5033
+2026-10-17,mapo_raemian_prugio,마포래미안푸르지오 59,jeonse_trade_median,전세 실거래 중위가,84000.0,66075.0,17925.0,1.2713
+2026-10-17,mapo_raemian_prugio,마포래미안푸르지오 59,sale_trade_last,매매 최근 실거래가,198000.0,154000.0,44000.0,1.2857
+2026-10-17,mapo_raemian_prugio,마포래미안푸르지오 59,sale_trade_median,매매 실거래 중위가,213000.0,152000.0,61000.0,1.4013
+2026-10-17,mapo_the_classy,마포더클래시 59,jeonse_trade_median,전세 실거래 중위가,87750.0,66075.0,21675.0,1.328
+2026-10-17,mapo_the_classy,마포더클래시 59,sale_trade_last,매매 최근 실거래가,219000.0,154000.0,65000.0,1.4221
+2026-10-17,mapo_the_classy,마포더클래시 59,sale_trade_median,매매 실거래 중위가,210000.0,152000.0,58000.0,1.3816
+2026-10-17,mapo_xi_the_centrige,마포자이더센트리지 59,jeonse_trade_median,전세 실거래 중위가,82900.0,66075.0,16825.0,1.2546
+2026-10-17,mapo_xi_the_centrige,마포자이더센트리지 59,sale_trade_last,매매 최근 실거래가,192000.0,154000.0,38000.0,1.2468
+2026-10-17,mapo_xi_the_centrige,마포자이더센트리지 59,sale_trade_median,매매 실거래 중위가,192000.0,152000.0,40000.0,1.2632
+2026-10-17,raemian_geumho_hiriver,래미안금호하이리버 59,jeonse_trade_median,전세 실거래 중위가,74000.0,66075.0,7925.0,1.1199
+2026-10-17,raemian_geumho_hiriver,래미안금호하이리버 59,sale_trade_last,매매 최근 실거래가,186500.0,154000.0,32500.0,1.211
+2026-10-17,raemian_geumho_hiriver,래미안금호하이리버 59,sale_trade_median,매매 실거래 중위가,186500.0,152000.0,34500.0,1.227
+2026-10-17,raemian_gongdeok5,래미안공덕5차 59,jeonse_trade_median,전세 실거래 중위가,79000.0,66075.0,12925.0,1.1956
+2026-10-17,raemian_gongdeok5,래미안공덕5차 59,sale_trade_last,매매 최근 실거래가,195000.0,154000.0,41000.0,1.2662
+2026-10-17,raemian_gongdeok5,래미안공덕5차 59,sale_trade_median,매매 실거래 중위가,198000.0,152000.0,46000.0,1.3026
+2026-10-17,raemian_oksu_riverzen,래미안옥수리버젠 59,jeonse_trade_median,전세 실거래 중위가,84000.0,66075.0,17925.0,1.2713
+2026-10-17,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_trade_last,매매 최근 실거래가,225000.0,154000.0,71000.0,1.461
+2026-10-17,raemian_oksu_riverzen,래미안옥수리버젠 59,sale_trade_median,매매 실거래 중위가,217000.0,152000.0,65000.0,1.4276
+2026-10-17,raemian_songpa_finetop,래미안송파파인탑 64,jeonse_trade_median,전세 실거래 중위가,81840.0,66075.0,15765.0,1.2386
+2026-10-17,raemian_songpa_finetop,래미안송파파인탑 64,sale_trade_last,매매 최근 실거래가,225500.0,154000.0,71500.0,1.4643
+2026-10-17,raemian_songpa_finetop,래미안송파파인탑 64,sale_trade_median,매매 실거래 중위가,215000.0,152000.0,63000.0,1.4145
+2026-10-17,seoulforest_prugio1,서울숲푸르지오 1차 59,jeonse_trade_median,전세 실거래 중위가,70700.0,66075.0,4625.0,1.07
+2026-10-17,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_trade_last,매매 최근 실거래가,191000.0,154000.0,37000.0,1.2403
+2026-10-17,seoulforest_prugio1,서울숲푸르지오 1차 59,sale_trade_median,매매 실거래 중위가,192500.0,152000.0,40500.0,1.2664
+2026-10-17,seoulforest_prugio2,서울숲푸르지오 2차 59,jeonse_trade_median,전세 실거래 중위가,80000.0,66075.0,13925.0,1.2107
+2026-10-17,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_trade_last,매매 최근 실거래가,215000.0,154000.0,61000.0,1.3961
+2026-10-17,seoulforest_prugio2,서울숲푸르지오 2차 59,sale_trade_median,매매 실거래 중위가,220000.0,152000.0,68000.0,1.4474
+2026-10-17,singeumho_park_xi,신금호파크자이 59,jeonse_trade_median,전세 실거래 중위가,81900.0,66075.0,15825.0,1.2395
+2026-10-17,singeumho_park_xi,신금호파크자이 59,sale_trade_last,매매 최근 실거래가,200000.0,154000.0,46000.0,1.2987
+2026-10-17,singeumho_park_xi,신금호파크자이 59,sale_trade_median,매매 실거래 중위가,202500.0,152000.0,50500.0,1.3322
